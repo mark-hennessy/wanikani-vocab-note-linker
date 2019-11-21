@@ -19,7 +19,6 @@ document.getElementById('app').innerHTML = `
 // @description  Creates links for vocabulary in the "Meaning Note" and "Reading Note" sections. See example below. Only works for vocabulary at the start of each new line. Vocabulary must be followed by a Japanese opening parenthesis（
 // @author       Mark Hennessy
 // @match        https://www.wanikani.com/vocabulary/*
-// @grant        none
 // ==/UserScript==
 
 // Example Meaning Note
@@ -27,6 +26,9 @@ document.getElementById('app').innerHTML = `
 // 木材（もくざい）Wood, Lumber 木材
 // 材木（ざいもく）Lumber, Timber, Wood
 // Some text
+
+// Download at GreasyFork
+// https://greasyfork.org/en/scripts/392752-wanikani-vocabulary-linker
 
 const linkify = noteClassName => {
   const noteElement = document.querySelector(noteClassName);
