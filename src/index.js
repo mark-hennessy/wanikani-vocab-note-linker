@@ -1,11 +1,15 @@
 import './styles.css';
 
 document.getElementById('app').innerHTML = `
-<h2>Meaning Note</h2>
-<div class="note-meaning noSwipe">木材（もくざい）Wood, Lumber 木材<br>材木（ざいもく）Lumber, Timber, Wood<br>Some text</div>
+<div>
+  <h2>Meaning Note</h2>
+  <div class="note-meaning noSwipe">木材（もくざい）Wood, Lumber 木材<br>材木（ざいもく）Lumber, Timber, Wood<br>Some text</div>
+</div>
 
-<h2>Reading Note</h2>
-<div class="note-reading noSwipe">木材（もくざい）Wood, Lumber 木材<br>材木（ざいもく）Lumber, Timber, Wood<br>Some text</div>
+<div>
+  <h2>Reading Note</h2>
+  <div class="note-reading noSwipe">木材（もくざい）Wood, Lumber 木材<br>材木（ざいもく）Lumber, Timber, Wood<br>Some text</div>
+</div>
 `;
 
 // ==UserScript==
@@ -35,21 +39,25 @@ const linkify = noteClassName => {
   const note = noteElement.innerHTML;
   const lines = note.split('<br>');
 
-  const enhancedLines = lines.map(line => {
-    const matchResult = line.match(/^(.*)（/);
-    if (!matchResult) {
-      return line;
-    }
+  const links = lines
+    .map(line => {
+      const matchResult = line.match(/^(.*)（/);
+      if (!matchResult) {
+        return null;
+      }
 
-    const vocabulary = matchResult[1];
-    return line.replace(
-      vocabulary,
-      `<a href='https://www.wanikani.com/vocabulary/${vocabulary}'>${vocabulary}</a>`,
-    );
-  });
+      const vocabulary = matchResult[1];
+      const link = `<a href='https://www.wanikani.com/vocabulary/${vocabulary}'>${vocabulary}</a>`;
+      return link;
+    })
+    .filter(v => !!v);
 
-  const enhancedNote = enhancedLines.join('<br>');
-  noteElement.innerHTML = enhancedNote;
+  const enhancedNote = links.join('　');
+
+  const linkElement = document.createElement('div');
+  linkElement.innerHTML = enhancedNote;
+
+  noteElement.parentElement.appendChild(linkElement);
 };
 
 linkify('.note-meaning');
