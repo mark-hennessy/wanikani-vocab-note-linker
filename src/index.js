@@ -28,12 +28,6 @@ document.getElementById('app').innerHTML = `
 // 材木（ざいもく）Lumber, Timber, Wood
 // Some text
 
-// Becomes
-// ==
-// <a href="https://www.wanikani.com/vocabulary/木材">木材</a>（もくざい）Wood, Lumber 木材
-// <a href="https://www.wanikani.com/vocabulary/材木">材木</a>（ざいもく）Lumber, Timber, Wood
-// Some text
-
 const linkify = noteClassName => {
   const noteElement = document.querySelector(noteClassName);
   const note = noteElement.innerHTML;
