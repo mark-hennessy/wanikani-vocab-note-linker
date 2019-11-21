@@ -49,6 +49,7 @@ const linkify = noteClassName => {
   const enhancedNote = links.join('　');
 
   const linkElement = document.createElement('div');
+  linkElement.style = 'margin-top: 0; margin-bottom: 0;';
   linkElement.innerHTML = enhancedNote;
 
   noteElement.parentElement.appendChild(linkElement);
