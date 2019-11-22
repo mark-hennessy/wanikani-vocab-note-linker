@@ -93,7 +93,12 @@ const parseGroupsFromNote = note => {
 
     const vocab = matchResult[1];
     const url = `https://www.wanikani.com/vocabulary/${vocab}`;
-    const link = `<a href="${url}" style='margin-right: 15px'>${vocab}</a>`;
+
+    const style = 'margin-right: 15px';
+    const link =
+      vocab !== currentVocab
+        ? `<a href="${url}" style="${style}">${vocab}</a>`
+        : `<span style="${style}">${vocab}</span>`;
 
     const entry = {
       vocab,
