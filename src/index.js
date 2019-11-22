@@ -71,7 +71,7 @@ const linkify = noteClassName => {
     const matchResult = line.match(/^(.*)（/);
 
     if (!matchResult) {
-      if (currentGroup && currentGroup.length) {
+      if (currentGroup.length) {
         groups.push([]);
       }
 
