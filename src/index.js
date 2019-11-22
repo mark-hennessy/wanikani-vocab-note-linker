@@ -74,7 +74,7 @@ const linkify = noteClassName => {
       }
 
       const vocabulary = matchResult[1];
-      const link = `<a href='https://www.wanikani.com/vocabulary/${vocabulary}' style='margin-right: 8px'>${vocabulary}</a>`;
+      const link = `<a href='https://www.wanikani.com/vocabulary/${vocabulary}' style='margin-right: 15px'>${vocabulary}</a>`;
       return link;
     })
     .filter(v => !!v);
