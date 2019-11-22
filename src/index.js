@@ -45,17 +45,29 @@ document.getElementById('app').innerHTML = `
 // ==UserScript==
 // @name         WaniKani Vocabulary Linker
 // @namespace    http://tampermonkey.net/
+// @description  Creates links for vocabulary in the "Meaning Note" and "Reading Note" sections.
 // @version      0.3
-// @description  Creates links for vocabulary in the "Meaning Note" and "Reading Note" sections. See example below. Only works for vocabulary at the start of each new line. Vocabulary must be followed by a Japanese opening parenthesis（
 // @author       Mark Hennessy
 // @match        https://www.wanikani.com/vocabulary/*
 // ==/UserScript==
+
+// Creates links for vocabulary in the "Meaning Note" and "Reading Note" sections.
+
+// Constraints
+// ==
+// Only works for vocabulary at the start of each new line.
+// Only works for vocabulary immediately followed by a Japanese opening parenthesis（.
 
 // Example Meaning Note
 // ==
 // 木材（もくざい）Wood, Lumber 木材
 // 材木（ざいもく）Lumber, Timber, Wood
 // Some text
+
+// Troubleshooting
+// ==
+// If the "All" link only opens a single tab, then the rest are being blocked as popup spam.
+// The solution is to tell your browser to stop blocking popups from WaniKani.
 
 // GreasyFork: https://greasyfork.org/en/scripts/392752-wanikani-vocabulary-linker
 // GitHub: https://github.com/mark-hennessy/wanikani-vocabulary-linker
@@ -99,8 +111,6 @@ const linkify = noteClassName => {
           .map(entry => entry.url)
           .map(url => `window.open('${url}');`)
           .join('') + 'return false;';
-
-      console.log(onclick);
 
       const allLink = `<a href="#" onclick="${onclick}">All</a>`;
 
