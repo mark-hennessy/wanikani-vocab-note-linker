@@ -72,12 +72,13 @@ document.getElementById('app').innerHTML = `
 // GreasyFork: https://greasyfork.org/en/scripts/392752-wanikani-vocabulary-linker
 // GitHub: https://github.com/mark-hennessy/wanikani-vocabulary-linker
 
-const linkify = noteClassName => {
-  const noteElement = document.querySelector(noteClassName);
-  const note = noteElement.innerHTML;
-  const lines = note.split('<br>').map(line => line.trim());
+const currentURL = decodeURI(window.location.href);
+const currentVocab = currentURL.split('/').pop();
 
+const parseGroupsFromNote = note => {
   const groups = [[]];
+
+  const lines = note.split('<br>').map(line => line.trim());
   lines.forEach(line => {
     const currentGroup = groups[groups.length - 1];
     const matchResult = line.match(/^(.*)（/);
@@ -103,11 +104,16 @@ const linkify = noteClassName => {
     currentGroup.push(entry);
   });
 
+  return groups;
+};
+
+const addAllLinkToGroups = groups => {
   groups
     .filter(g => g.length > 1)
     .forEach(g => {
       const onclick =
         g
+          .filter(entry => entry.vocab !== currentVocab)
           .map(entry => entry.url)
           .map(url => `window.open('${url}');`)
           .join('') + 'return false;';
@@ -120,17 +126,30 @@ const linkify = noteClassName => {
 
       g.push(entry);
     });
+};
 
-  const enhancedNote = groups
+const generateLinkSectionContent = groups => {
+  return groups
     .map(g => g.map(entry => entry.link))
     .map(g => g.join(''))
     .join('<br>');
+};
 
-  const linkElement = document.createElement('div');
-  linkElement.style = 'margin-top: 0; margin-bottom: 0;';
-  linkElement.innerHTML = enhancedNote;
+const linkify = noteClassName => {
+  const noteElement = document.querySelector(noteClassName);
+  const note = noteElement.innerHTML;
 
-  noteElement.parentElement.appendChild(linkElement);
+  const groups = parseGroupsFromNote(note);
+
+  addAllLinkToGroups(groups);
+
+  const linkSectionContent = generateLinkSectionContent(groups);
+
+  const linkSection = document.createElement('div');
+  linkSection.style = 'margin-top: 0; margin-bottom: 0;';
+  linkSection.innerHTML = linkSectionContent;
+
+  noteElement.parentElement.appendChild(linkSection);
 };
 
 linkify('.note-meaning');
