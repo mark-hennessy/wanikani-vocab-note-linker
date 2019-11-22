@@ -78,43 +78,41 @@ const linkify = noteClassName => {
       return;
     }
 
-    const vocabulary = matchResult[1];
-    const url = `https://www.wanikani.com/vocabulary/${vocabulary}`;
-    const link = `<a href="${url}" style='margin-right: 15px'>${vocabulary}</a>`;
-    const linkInfo = {
+    const vocab = matchResult[1];
+    const url = `https://www.wanikani.com/vocabulary/${vocab}`;
+    const link = `<a href="${url}" style='margin-right: 15px'>${vocab}</a>`;
+
+    const entry = {
+      vocab,
       url,
       link,
     };
 
-    currentGroup.push(linkInfo);
+    currentGroup.push(entry);
   });
-
-  const openInNewTab = url => {
-    window.open(url, '_blank');
-  };
 
   groups
     .filter(g => g.length > 1)
     .forEach(g => {
-      const openGroupInNewTab = () => {
-        g.forEach(openInNewTab);
+      const onclick =
+        g
+          .map(entry => entry.url)
+          .map(url => `window.open('${url}', '_blank');`)
+          .join('') + 'return false;';
 
-        // To ignore the href
-        return false;
-      };
+      console.log(onclick);
 
-      const allLink =
-        '<a href="#" onclick="return openGroupInNewTab()">All</a>';
-        
-      const linkInfo = {
+      const allLink = `<a href="#" onclick="${onclick}">All</a>`;
+
+      const entry = {
         link: allLink,
       };
 
-      g.push(linkInfo);
+      g.push(entry);
     });
 
   const enhancedNote = groups
-    .map(g => g.map(info => info.link))
+    .map(g => g.map(entry => entry.link))
     .map(g => g.join(''))
     .join('<br>');
 
