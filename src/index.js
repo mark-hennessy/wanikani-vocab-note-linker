@@ -1,14 +1,44 @@
 import './styles.css';
 
+const note = `
+木材（もくざい）Wood, Lumber 木材
+<br>
+材木（ざいもく）Lumber, Timber, Wood
+<br>
+Some text
+<br>
+<br>
+材料（ざいりょう）Ingredients, Material
+<br>
+資料（しりょう）Material, Data
+<br>
+<br>
+<br>
+木材（もくざい）Wood, Lumber 木材
+<br>
+材木（ざいもく）Lumber, Timber, Wood
+<br>
+材料（ざいりょう）Ingredients, Material
+<br>
+資料（しりょう）Material, Data
+<br>
+<br>
+Some more text
+`;
+
 document.getElementById('app').innerHTML = `
 <div>
   <h2>Meaning Note</h2>
-  <div class="note-meaning noSwipe">木材（もくざい）Wood, Lumber 木材<br>材木（ざいもく）Lumber, Timber, Wood<br>Some text</div>
+  <div class="note-meaning noSwipe">
+    ${note}
+  </div>
 </div>
 
 <div>
   <h2>Reading Note</h2>
-  <div class="note-reading noSwipe">木材（もくざい）Wood, Lumber 木材<br>材木（ざいもく）Lumber, Timber, Wood<br>Some text</div>
+  <div class="note-reading noSwipe">
+    ${note}
+  </div>
 </div>
 `;
 
@@ -27,8 +57,8 @@ document.getElementById('app').innerHTML = `
 // 材木（ざいもく）Lumber, Timber, Wood
 // Some text
 
-// Download at GreasyFork
-// https://greasyfork.org/en/scripts/392752-wanikani-vocabulary-linker
+// GreasyFork: https://greasyfork.org/en/scripts/392752-wanikani-vocabulary-linker
+// GitHub: https://github.com/mark-hennessy/wanikani-vocabulary-linker
 
 const linkify = noteClassName => {
   const noteElement = document.querySelector(noteClassName);
@@ -36,19 +66,20 @@ const linkify = noteClassName => {
   const lines = note.split('<br>');
 
   const links = lines
+    .map(line => line.trim())
     .map(line => {
       const matchResult = line.match(/^(.*)（/);
       if (!matchResult) {
-        return null;
+        return '<br>';
       }
 
       const vocabulary = matchResult[1];
-      const link = `<a href='https://www.wanikani.com/vocabulary/${vocabulary}'>${vocabulary}</a>`;
+      const link = `<a href='https://www.wanikani.com/vocabulary/${vocabulary}' style='margin-right: 8px'>${vocabulary}</a>`;
       return link;
     })
     .filter(v => !!v);
 
-  const enhancedNote = links.join('　');
+  const enhancedNote = links.join('').replace(/(<br>)+/g, '<br>');
 
   const linkElement = document.createElement('div');
   linkElement.style = 'margin-top: 0; margin-bottom: 0;';
