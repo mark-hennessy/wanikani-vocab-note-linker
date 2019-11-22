@@ -45,7 +45,7 @@ document.getElementById('app').innerHTML = `
 // ==UserScript==
 // @name         WaniKani Vocabulary Linker
 // @namespace    http://tampermonkey.net/
-// @version      0.1
+// @version      0.3
 // @description  Creates links for vocabulary in the "Meaning Note" and "Reading Note" sections. See example below. Only works for vocabulary at the start of each new line. Vocabulary must be followed by a Japanese opening parenthesis（
 // @author       Mark Hennessy
 // @match        https://www.wanikani.com/vocabulary/*
