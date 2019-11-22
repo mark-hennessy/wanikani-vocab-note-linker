@@ -79,12 +79,44 @@ const linkify = noteClassName => {
     }
 
     const vocabulary = matchResult[1];
-    const link = `<a href='https://www.wanikani.com/vocabulary/${vocabulary}' style='margin-right: 15px'>${vocabulary}</a>`;
-    currentGroup.push(link);
+    const url = `https://www.wanikani.com/vocabulary/${vocabulary}`;
+    const link = `<a href="${url}" style='margin-right: 15px'>${vocabulary}</a>`;
+    const linkInfo = {
+      url,
+      link,
+    };
+
+    currentGroup.push(linkInfo);
   });
 
-  // const allLink = '<a></a>';
-  const enhancedNote = groups.map(g => g.join('')).join('<br>');
+  const openInNewTab = url => {
+    window.open(url, '_blank');
+  };
+
+  groups
+    .filter(g => g.length > 1)
+    .forEach(g => {
+      const openGroupInNewTab = () => {
+        g.forEach(openInNewTab);
+
+        // To ignore the href
+        return false;
+      };
+
+      const allLink =
+        '<a href="#" onclick="return openGroupInNewTab()">All</a>';
+        
+      const linkInfo = {
+        link: allLink,
+      };
+
+      g.push(linkInfo);
+    });
+
+  const enhancedNote = groups
+    .map(g => g.map(info => info.link))
+    .map(g => g.join(''))
+    .join('<br>');
 
   const linkElement = document.createElement('div');
   linkElement.style = 'margin-top: 0; margin-bottom: 0;';
