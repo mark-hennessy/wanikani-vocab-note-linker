@@ -46,7 +46,7 @@ document.getElementById('app').innerHTML = `
 // @name         WaniKani Vocabulary Linker
 // @namespace    http://tampermonkey.net/
 // @description  Creates links for vocabulary in the "Meaning Note" and "Reading Note" sections.
-// @version      0.3
+// @version      0.4
 // @author       Mark Hennessy
 // @match        https://www.wanikani.com/vocabulary/*
 // ==/UserScript==
