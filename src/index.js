@@ -97,7 +97,7 @@ const linkify = noteClassName => {
       const onclick =
         g
           .map(entry => entry.url)
-          .map(url => `window.open('${url}', '_blank');`)
+          .map(url => `window.open('${url}');`)
           .join('') + 'return false;';
 
       console.log(onclick);
