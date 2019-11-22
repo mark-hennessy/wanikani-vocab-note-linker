@@ -63,23 +63,28 @@ document.getElementById('app').innerHTML = `
 const linkify = noteClassName => {
   const noteElement = document.querySelector(noteClassName);
   const note = noteElement.innerHTML;
-  const lines = note.split('<br>');
+  const lines = note.split('<br>').map(line => line.trim());
 
-  const links = lines
-    .map(line => line.trim())
-    .map(line => {
-      const matchResult = line.match(/^(.*)（/);
-      if (!matchResult) {
-        return '<br>';
+  const groups = [[]];
+  lines.forEach(line => {
+    const currentGroup = groups[groups.length - 1];
+    const matchResult = line.match(/^(.*)（/);
+
+    if (!matchResult) {
+      if (currentGroup && currentGroup.length) {
+        groups.push([]);
       }
 
-      const vocabulary = matchResult[1];
-      const link = `<a href='https://www.wanikani.com/vocabulary/${vocabulary}' style='margin-right: 15px'>${vocabulary}</a>`;
-      return link;
-    })
-    .filter(v => !!v);
+      return;
+    }
 
-  const enhancedNote = links.join('').replace(/(<br>)+/g, '<br>');
+    const vocabulary = matchResult[1];
+    const link = `<a href='https://www.wanikani.com/vocabulary/${vocabulary}' style='margin-right: 15px'>${vocabulary}</a>`;
+    currentGroup.push(link);
+  });
+
+  // const allLink = '<a></a>';
+  const enhancedNote = groups.map(g => g.join('')).join('<br>');
 
   const linkElement = document.createElement('div');
   linkElement.style = 'margin-top: 0; margin-bottom: 0;';
