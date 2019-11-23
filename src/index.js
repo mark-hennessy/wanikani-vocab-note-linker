@@ -53,21 +53,37 @@ document.getElementById('app').innerHTML = `
 
 // Creates links for vocabulary in the "Meaning Note" and "Reading Note" sections.
 
-// Constraints
-// ==
-// Only works for vocabulary at the start of each new line.
-// Only works for vocabulary immediately followed by a Japanese opening parenthesis（.
-
 // Example Meaning Note
 // ==
 // 木材（もくざい）Wood, Lumber 木材
 // 材木（ざいもく）Lumber, Timber, Wood
+//
 // Some text
 
-// Troubleshooting
+// Constraints & Limitations
 // ==
-// If the "All" link only opens a single tab, then the rest are being blocked as popup spam.
-// The solution is to tell your browser to stop blocking popups from WaniKani.
+// The script only works for vocabulary at the start of each new line
+// The script only works for vocabulary immediately followed by a Japanese opening parenthesis（
+// Chrome for mobile does not allow add-ons and thus does not support Tampermonkey UserScripts
+// The "All" link will only work if you enable multiple popups/tabs in your browser settings
+
+// How to use UserScripts on Firefox for mobile
+// ==
+// Install Firefox for mobile
+// Install the Tampermonkey extension
+// Visit GreasyFork.org to install this script
+
+// Enable multiple popups/tabs in Chrome
+// =
+// Click the "All" link
+// Check the URL bar for a notification icon telling you that popups were blocked
+// Click the icon and tell chrome to stop blocking popups from WaniKani
+
+// Enable multiple popups/tabs in Firefox for Android (probably iOS as well)
+// =
+// Type "about:config" in the URL bar
+// Search for "popups"
+// Click "dom.block_multiple_popups" to change the value to "false"
 
 // GreasyFork: https://greasyfork.org/en/scripts/392752-wanikani-vocabulary-linker
 // GitHub: https://github.com/mark-hennessy/wanikani-vocabulary-linker
