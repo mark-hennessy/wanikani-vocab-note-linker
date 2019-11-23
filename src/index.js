@@ -46,7 +46,7 @@ document.getElementById('app').innerHTML = `
 // @name         WaniKani Vocabulary Linker
 // @namespace    http://tampermonkey.net/
 // @description  Creates links for vocabulary in the "Meaning Note" and "Reading Note" sections.
-// @version      0.4
+// @version      0.5
 // @author       Mark Hennessy
 // @match        https://www.wanikani.com/vocabulary/*
 // ==/UserScript==
@@ -162,22 +162,48 @@ const generateLinkSectionContent = groups => {
     .join('<br>');
 };
 
-const linkify = noteClassName => {
-  const noteElement = document.querySelector(noteClassName);
+const updateLinkSection = noteElement => {
+  const noteParentElement = noteElement.parentElement;
   const note = noteElement.innerHTML;
 
   const groups = parseGroupsFromNote(note);
 
   addAllLinkToGroups(groups);
 
+  const linkSectionClassName = 'link-section';
+  const linkSectionSelector = `.${linkSectionClassName}`;
+  let linkSectionElement = noteParentElement.querySelector(linkSectionSelector);
+
+  if (!linkSectionElement) {
+    linkSectionElement = document.createElement('div');
+    linkSectionElement.className = linkSectionClassName;
+    linkSectionElement.style = 'margin-top: 0; margin-bottom: 0;';
+    noteParentElement.appendChild(linkSectionElement);
+  }
+
   const linkSectionContent = generateLinkSectionContent(groups);
-
-  const linkSection = document.createElement('div');
-  linkSection.style = 'margin-top: 0; margin-bottom: 0;';
-  linkSection.innerHTML = linkSectionContent;
-
-  noteElement.parentElement.appendChild(linkSection);
+  linkSectionElement.innerHTML = linkSectionContent;
 };
 
-linkify('.note-meaning');
-linkify('.note-reading');
+const registerMutationObserver = noteElement => {
+  const mutationCallback = () => {
+    updateLinkSection(noteElement);
+  };
+
+  const observer = new MutationObserver(mutationCallback);
+  observer.observe(noteElement, { childList: true, subtree: true });
+};
+
+const linkify = noteSelector => {
+  const noteElement = document.querySelector(noteSelector);
+
+  // Initialize the link section
+  updateLinkSection(noteElement);
+
+  // Register a change handler to keep the link section up to date
+  registerMutationObserver(noteElement);
+};
+
+const noteSelectors = ['.note-meaning', '.note-reading'];
+
+noteSelectors.forEach(linkify);
