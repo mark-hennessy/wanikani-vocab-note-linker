@@ -49,7 +49,7 @@ document.getElementById('app').innerHTML = `
 // @version      0.6
 // @author       Mark Hennessy
 // @match        https://www.wanikani.com/vocabulary/*
-// @grant        MIT
+// @license        MIT
 // ==/UserScript==
 
 /*
