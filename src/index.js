@@ -12,7 +12,8 @@
 WaniKani Vocabulary Linker
 ==
 Creates links for vocabulary in the **Meaning Note** and **Reading Note** sections.
-Take a look at the screenshot and try the [CodeSandbox Demo!](https://codesandbox.io/s/wanikani-vocabulary-linker-jzejl)
+
+Take a look at the screenshots and try the [CodeSandbox Demo!](https://codesandbox.io/s/wanikani-vocabulary-linker-jzejl)
 
 Example Meaning Note
 ==
