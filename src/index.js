@@ -46,9 +46,10 @@ document.getElementById('app').innerHTML = `
 // @name         WaniKani Vocabulary Linker
 // @namespace    http://tampermonkey.net/
 // @description  Creates links for vocabulary in the "Meaning Note" and "Reading Note" sections.
-// @version      0.5
+// @version      0.6
 // @author       Mark Hennessy
 // @match        https://www.wanikani.com/vocabulary/*
+// @grant        MIT
 // ==/UserScript==
 
 /*
@@ -163,7 +164,8 @@ const generateLinkSectionContent = groups => {
 };
 
 const updateLinkSection = noteElement => {
-  const editorIsOpen = noteElement.firstElementChild.tagName === 'FORM';
+  const noteFirstChild = noteElement.firstChild;
+  const editorIsOpen = noteFirstChild && noteFirstChild.nodeName === 'FORM';
   if (editorIsOpen) {
     return;
   }
