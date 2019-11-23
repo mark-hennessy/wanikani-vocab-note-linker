@@ -163,6 +163,11 @@ const generateLinkSectionContent = groups => {
 };
 
 const updateLinkSection = noteElement => {
+  const editorIsOpen = noteElement.firstElementChild.tagName === 'FORM';
+  if (editorIsOpen) {
+    return;
+  }
+
   const noteParentElement = noteElement.parentElement;
   const note = noteElement.innerHTML;
 
