@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WaniKani Vocabulary Linker
 // @namespace    http://tampermonkey.net/
-// @description  Creates links for vocabulary in the **Meaning Note** and **Reading Note** sections.
+// @description  Creates links for vocabulary in the Meaning Note and Reading Note sections.
 // @version      1.0
 // @author       Mark Hennessy
 // @match        https://www.wanikani.com/vocabulary/*
