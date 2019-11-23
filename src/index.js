@@ -58,6 +58,37 @@ MIT
 */
 
 (function() {
+  // START Utilities
+  const registerMutationObserver = (element, mutationCallback) => {
+    const observer = new MutationObserver(mutationCallback);
+    observer.observe(element, { childList: true, subtree: true });
+  };
+
+  const isNoteOpen = noteElement => {
+    const noteFirstChild = noteElement.firstChild;
+    return noteFirstChild && noteFirstChild.nodeName === 'FORM';
+  };
+
+  const getOrCreateElement = ({
+    tagName = 'div',
+    className,
+    style,
+    parentElement,
+  }) => {
+    const selector = `.${className}`;
+    let element = parentElement.querySelector(selector);
+
+    if (!element) {
+      element = document.createElement(tagName);
+      element.className = className;
+      element.style = style;
+      parentElement.appendChild(element);
+    }
+
+    return element;
+  };
+  // END Utilities
+
   const currentURL = decodeURI(window.location.href);
   const currentVocab = currentURL.split('/').pop();
 
@@ -129,9 +160,7 @@ MIT
   };
 
   const updateLinkSection = noteElement => {
-    const noteFirstChild = noteElement.firstChild;
-    const editorIsOpen = noteFirstChild && noteFirstChild.nodeName === 'FORM';
-    if (editorIsOpen) {
+    if (isNoteOpen(noteElement)) {
       return;
     }
 
@@ -142,30 +171,13 @@ MIT
 
     addAllLinkToGroups(groups);
 
-    const linkSectionClassName = 'link-section';
-    const linkSectionSelector = `.${linkSectionClassName}`;
-    let linkSectionElement = noteParentElement.querySelector(
-      linkSectionSelector,
-    );
-
-    if (!linkSectionElement) {
-      linkSectionElement = document.createElement('div');
-      linkSectionElement.className = linkSectionClassName;
-      linkSectionElement.style = 'margin-top: 0; margin-bottom: 0;';
-      noteParentElement.appendChild(linkSectionElement);
-    }
+    let linkSectionElement = getOrCreateElement({
+      className: 'link-section',
+      parentElement: noteParentElement,
+    });
 
     const linkSectionContent = generateLinkSectionContent(groups);
     linkSectionElement.innerHTML = linkSectionContent;
-  };
-
-  const registerMutationObserver = noteElement => {
-    const mutationCallback = () => {
-      updateLinkSection(noteElement);
-    };
-
-    const observer = new MutationObserver(mutationCallback);
-    observer.observe(noteElement, { childList: true, subtree: true });
   };
 
   const linkify = noteSelector => {
@@ -175,7 +187,9 @@ MIT
     updateLinkSection(noteElement);
 
     // Register a change handler to keep the link section up to date
-    registerMutationObserver(noteElement);
+    registerMutationObserver(noteElement, () => {
+      updateLinkSection(noteElement);
+    });
   };
 
   const noteSelectors = ['.note-meaning', '.note-reading'];
