@@ -132,24 +132,28 @@ MIT
     };
   };
 
+  const addAllLinkIfNeeded = group => {
+    if (group.length > 1) {
+      const allEntry = createAllEntry(group);
+      group.push(allEntry);
+    }
+  };
+
   const parseGroupsFromNote = note => {
     const groups = [[]];
 
     const lines = note.split('<br>').map(line => line.trim());
-    lines.forEach(line => {
+    lines.forEach((line, lineIndex) => {
+      const isLastLine = lineIndex === lines.length - 1;
       const currentGroup = groups[groups.length - 1];
-      const linkCount = currentGroup.length;
 
       // Match anything followed by a Japanese opening parenthesis and assume it's kanji
       const matchResult = line.match(/^(.*)（/);
 
       if (!matchResult) {
-        if (linkCount) {
-          if (linkCount > 1) {
-            const allEntry = createAllEntry(currentGroup);
-            currentGroup.push(allEntry);
-          }
+        addAllLinkIfNeeded(currentGroup);
 
+        if (currentGroup.length && !isLastLine) {
           // Start a new group
           groups.push([]);
         }
@@ -161,6 +165,10 @@ MIT
       const item = matchResult[1];
       const itemEntry = createItemEntry(item);
       currentGroup.push(itemEntry);
+
+      if (isLastLine) {
+        addAllLinkIfNeeded(currentGroup);
+      }
     });
 
     return groups;

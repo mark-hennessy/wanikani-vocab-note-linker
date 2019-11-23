@@ -10,6 +10,9 @@ const note = `
 本気（ほんき）Serious
 <br>
 <br>
+ほんき sounds silly/funny...but it means Serious haha.
+<br>
+<br>
 本気（ほんき）Serious
 <br>
 根気（こんき）Patience, Perseverance, Persistence
@@ -18,9 +21,6 @@ const note = `
 本気（ほんき）Serious
 <br>
 基本（きほん）Foundation, Basics
-<br>
-<br>
-ほんき sounds silly/funny...but it means Serious haha.
 `;
 
 document.getElementById('app').innerHTML = `
