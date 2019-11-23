@@ -15,11 +15,9 @@ Creates links for vocabulary in the "Meaning Note" and "Reading Note" sections.
 
 Example Meaning Note
 ==
->木材（もくざい）Wood, Lumber 木材
->材木（ざいもく）Lumber, Timber, Wood
->
->Some text
-
+木材（もくざい）Wood, Lumber 木材
+材木（ざいもく）Lumber, Timber, Wood
+Some text
 
 Constraints & Limitations
 ==
