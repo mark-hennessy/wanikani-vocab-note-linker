@@ -94,11 +94,12 @@ const parseGroupsFromNote = note => {
     const vocab = matchResult[1];
     const url = `https://www.wanikani.com/vocabulary/${vocab}`;
 
-    const style = 'margin-right: 15px';
-    const link =
-      vocab !== currentVocab
-        ? `<a href="${url}" style="${style}">${vocab}</a>`
-        : `<span style="${style}">${vocab}</span>`;
+    let style = 'margin-right: 15px;';
+    if (vocab === currentVocab) {
+      style += 'color: black;';
+    }
+
+    const link = `<a href="${url}" style="${style}" target="_blank" rel="noopener noreferrer">${vocab}</a>`;
 
     const entry = {
       vocab,
@@ -120,7 +121,8 @@ const addAllLinkToGroups = groups => {
         g
           .filter(entry => entry.vocab !== currentVocab)
           .map(entry => entry.url)
-          .map(url => `window.open('${url}');`)
+          // _blank is needed for Firefox
+          .map(url => `window.open('${url}', '_blank');`)
           .join('') + 'return false;';
 
       const allLink = `<a href="#" onclick="${onclick}">All</a>`;
