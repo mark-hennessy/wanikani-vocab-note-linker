@@ -165,9 +165,7 @@ MIT
   };
 
   const updateLinkSection = noteElement => {
-    if (isNoteOpen(noteElement)) {
-      return;
-    }
+    if (isNoteOpen(noteElement)) return;
 
     const noteParentElement = noteElement.parentElement;
     const note = noteElement.innerHTML;
@@ -185,6 +183,7 @@ MIT
 
   const linkify = noteSelector => {
     const noteElement = document.querySelector(noteSelector);
+    if (!noteElement) return;
 
     // Initialize the link section
     updateLinkSection(noteElement);
