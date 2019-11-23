@@ -11,7 +11,7 @@
 /*
 WaniKani Vocabulary Linker
 ==
-Creates links for vocabulary in the "Meaning Note" and "Reading Note" sections.
+Creates links for vocabulary in the **Meaning Note** and **Reading Note** sections.
 
 Example Meaning Note
 ==
@@ -22,27 +22,27 @@ Some text
 Constraints & Limitations
 ==
 * The script only works for vocabulary at the start of each new line
-* The script only works for vocabulary immediately followed by a Japanese opening parenthesis（
+* The script only works for vocabulary immediately followed by a Japanese opening parenthesis `（`
 * Chrome for mobile does not allow add-ons and thus does not support Tampermonkey UserScripts
-* The "All" link will only work if you enable multiple popups/tabs in your browser settings
+* The `All` link will only work if you enable multiple popups/tabs in your browser settings
 
 How to use UserScripts on Firefox for mobile
 ==
 1. Install Firefox for mobile
-2. Install the Tampermonkey extension
-3. Visit GreasyFork.org to install this script
+2. Open Firefox and install [Tampermonkey](https://addons.mozilla.org/en-US/android/addon/tampermonkey/)
+3. Find and install scripts from [GreasyFork](https://greasyfork.org/en/scripts?utf8=%E2%9C%93&q=wanikani)
 
 Enable multiple popups/tabs in Chrome
 ==
-1. Click the "All" link
+1. Click the `All` link
 2. Check the URL bar for a notification icon telling you that popups were blocked
 3. Click the icon and tell chrome to stop blocking popups from WaniKani
 
 Enable multiple popups/tabs in Firefox for Android (probably iOS as well)
 ==
-1. Type "about:config" in the URL bar
-2. Search for "popups"
-3. Click "dom.block_multiple_popups" to change the value to "false"
+1. Type `about:config` in the URL bar
+2. Search for `popups`
+3. Click `dom.block_multiple_popups` to change the value to `false`
 
 Useful Links
 ==
