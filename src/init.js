@@ -1,29 +1,26 @@
 import './styles.css';
 
 const note = `
-木材（もくざい）Wood, Lumber 木材
+大変（たいへん）Serious, Terrible, Very, Difficult, Hard, Hectic
 <br>
-材木（ざいもく）Lumber, Timber, Wood
+深刻（しんこく）Serious, Grave
 <br>
-Some text
+真剣（しんけん）Serious
 <br>
-<br>
-材料（ざいりょう）Ingredients, Material
-<br>
-資料（しりょう）Material, Data
+本気（ほんき）Serious
 <br>
 <br>
+本気（ほんき）Serious
 <br>
-木材（もくざい）Wood, Lumber 木材
-<br>
-材木（ざいもく）Lumber, Timber, Wood
-<br>
-材料（ざいりょう）Ingredients, Material
-<br>
-資料（しりょう）Material, Data
+根気（こんき）Patience, Perseverance, Persistence
 <br>
 <br>
-Some more text
+本気（ほんき）Serious
+<br>
+基本（きほん）Foundation, Basics
+<br>
+<br>
+ほんき sounds silly/funny...but it means Serious haha.
 `;
 
 document.getElementById('app').innerHTML = `
