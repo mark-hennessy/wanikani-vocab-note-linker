@@ -2,7 +2,7 @@
 // @name         WaniKani Vocabulary Linker
 // @namespace    http://tampermonkey.net/
 // @description  Creates links for vocabulary in the Meaning Note and Reading Note sections.
-// @version      1.0
+// @version      1.0.1
 // @author       Mark Hennessy
 // @match        https://www.wanikani.com/vocabulary/*
 // @license      MIT
@@ -131,12 +131,12 @@ MIT
     const lines = note.split('<br>').map(line => line.trim());
     lines.forEach(line => {
       const currentGroup = groups[groups.length - 1];
-      const currentGroupLength = currentGroup.length;
+      const linkCount = currentGroup.length;
       const matchResult = line.match(/^(.*)（/);
 
       if (!matchResult) {
-        if (currentGroupLength) {
-          if (currentGroupLength > 1) {
+        if (linkCount) {
+          if (linkCount > 1) {
             const allEntry = createAllEntry(currentGroup);
             currentGroup.push(allEntry);
           }
