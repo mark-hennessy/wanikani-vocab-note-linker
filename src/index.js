@@ -89,21 +89,27 @@ MIT
   };
   // END Utilities
 
-  const currentURL = decodeURI(window.location.href);
-  const currentVocab = currentURL.split('/').pop();
+  const isWaniKani = window.location.host === 'www.wanikani.com';
+  const pathInfo = decodeURI(window.location.pathname).split('/');
 
-  const createVocabEntry = vocab => {
-    const url = `https://www.wanikani.com/vocabulary/${vocab}`;
+  const currentItemType = isWaniKani
+    ? pathInfo[pathInfo.length - 2]
+    : 'vocabulary';
+
+  const currentItem = pathInfo[pathInfo.length - 1];
+
+  const createItemEntry = item => {
+    const url = `https://www.wanikani.com/${currentItemType}/${item}`;
 
     let style = 'margin-right: 15px;';
-    if (vocab === currentVocab) {
+    if (item === currentItem) {
       style += 'color: black;';
     }
 
-    const link = `<a href="${url}" style="${style}" target="_blank" rel="noopener noreferrer">${vocab}</a>`;
+    const link = `<a href="${url}" style="${style}" target="_blank" rel="noopener noreferrer">${item}</a>`;
 
     return {
-      vocab,
+      item,
       url,
       link,
     };
@@ -112,7 +118,7 @@ MIT
   const createAllEntry = group => {
     const onclick =
       group
-        .filter(entry => entry.vocab !== currentVocab)
+        .filter(entry => entry.item !== currentItem)
         .map(entry => entry.url)
         // _blank is needed for Firefox
         .map(url => `window.open('${url}', '_blank');`)
@@ -149,9 +155,9 @@ MIT
         return;
       }
 
-      const vocab = matchResult[1];
-      const vocabEntry = createVocabEntry(vocab);
-      currentGroup.push(vocabEntry);
+      const item = matchResult[1];
+      const itemEntry = createItemEntry(item);
+      currentGroup.push(itemEntry);
     });
 
     return groups;
