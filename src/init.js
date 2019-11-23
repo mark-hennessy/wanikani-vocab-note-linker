@@ -18,6 +18,9 @@ const note = `
 根気（こんき）Patience, Perseverance, Persistence
 <br>
 <br>
+根気（こんき）Patience, Perseverance, Persistence
+<br>
+<br>
 本気（ほんき）Serious
 <br>
 基本（きほん）Foundation, Basics

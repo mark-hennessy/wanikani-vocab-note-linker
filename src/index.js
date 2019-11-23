@@ -2,7 +2,7 @@
 // @name         WaniKani Vocabulary Linker
 // @namespace    http://tampermonkey.net/
 // @description  Creates links for vocabulary in the Meaning Note and Reading Note sections.
-// @version      1.2.0
+// @version      1.3.0
 // @author       Mark Hennessy
 // @match        https://www.wanikani.com/vocabulary/*
 // @match        https://www.wanikani.com/kanji/*
@@ -132,28 +132,19 @@ MIT
     };
   };
 
-  const addAllLinkIfNeeded = group => {
-    if (group.length > 1) {
-      const allEntry = createAllEntry(group);
-      group.push(allEntry);
-    }
-  };
-
   const parseGroupsFromNote = note => {
     const groups = [[]];
 
     const lines = note.split('<br>').map(line => line.trim());
     lines.forEach((line, lineIndex) => {
       const isLastLine = lineIndex === lines.length - 1;
-      const currentGroup = groups[groups.length - 1];
+      const group = groups[groups.length - 1];
 
       // Match anything followed by a Japanese opening parenthesis and assume it's kanji
       const matchResult = line.match(/^(.*)（/);
 
       if (!matchResult) {
-        addAllLinkIfNeeded(currentGroup);
-
-        if (currentGroup.length && !isLastLine) {
+        if (group.length && !isLastLine) {
           // Start a new group
           groups.push([]);
         }
@@ -164,20 +155,24 @@ MIT
 
       const item = matchResult[1];
       const itemEntry = createItemEntry(item);
-      currentGroup.push(itemEntry);
-
-      if (isLastLine) {
-        addAllLinkIfNeeded(currentGroup);
-      }
+      group.push(itemEntry);
     });
 
     return groups;
   };
 
+  const addAllLinkToGroups = groups => {
+    return groups.map(group => {
+      if (group.length <= 1) return group;
+
+      return [...group, createAllEntry(group)];
+    });
+  };
+
   const generateLinkSectionContent = groups => {
     return groups
-      .map(g => g.map(entry => entry.link))
-      .map(g => g.join(''))
+      .map(group => group.map(entry => entry.link))
+      .map(group => group.join(''))
       .join('<br>');
   };
 
@@ -187,7 +182,8 @@ MIT
     const noteParentElement = noteElement.parentElement;
     const note = noteElement.innerHTML;
 
-    const groups = parseGroupsFromNote(note);
+    let groups = parseGroupsFromNote(note);
+    groups = addAllLinkToGroups(groups);
 
     let linkSectionElement = getOrCreateElement({
       className: 'link-section',
