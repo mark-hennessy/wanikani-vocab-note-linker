@@ -6,7 +6,6 @@
 // @author       Mark Hennessy
 // @match        https://www.wanikani.com/vocabulary/*
 // @match        https://www.wanikani.com/kanji/*
-// @match        https://www.wanikani.com/radicals/*
 // @license      MIT
 // ==/UserScript==
 
@@ -140,6 +139,8 @@ MIT
     lines.forEach(line => {
       const currentGroup = groups[groups.length - 1];
       const linkCount = currentGroup.length;
+
+      // Match anything followed by a Japanese opening parenthesis and assume it's kanji
       const matchResult = line.match(/^(.*)（/);
 
       if (!matchResult) {
