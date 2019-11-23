@@ -92,64 +92,69 @@ MIT
   const currentURL = decodeURI(window.location.href);
   const currentVocab = currentURL.split('/').pop();
 
+  const createVocabEntry = vocab => {
+    const url = `https://www.wanikani.com/vocabulary/${vocab}`;
+
+    let style = 'margin-right: 15px;';
+    if (vocab === currentVocab) {
+      style += 'color: black;';
+    }
+
+    const link = `<a href="${url}" style="${style}" target="_blank" rel="noopener noreferrer">${vocab}</a>`;
+
+    return {
+      vocab,
+      url,
+      link,
+    };
+  };
+
+  const createAllEntry = group => {
+    const onclick =
+      group
+        .filter(entry => entry.vocab !== currentVocab)
+        .map(entry => entry.url)
+        // _blank is needed for Firefox
+        .map(url => `window.open('${url}', '_blank');`)
+        .join('') + 'return false;';
+
+    const allLink = `<a href="#" onclick="${onclick}">All</a>`;
+
+    return {
+      link: allLink,
+    };
+  };
+
   const parseGroupsFromNote = note => {
     const groups = [[]];
 
     const lines = note.split('<br>').map(line => line.trim());
     lines.forEach(line => {
       const currentGroup = groups[groups.length - 1];
+      const currentGroupLength = currentGroup.length;
       const matchResult = line.match(/^(.*)（/);
 
       if (!matchResult) {
-        if (currentGroup.length) {
+        if (currentGroupLength) {
+          if (currentGroupLength > 1) {
+            const allEntry = createAllEntry(currentGroup);
+            currentGroup.push(allEntry);
+          }
+
+          // Start a new group
           groups.push([]);
         }
 
+        // Continue to the next line
         return;
       }
 
       const vocab = matchResult[1];
-      const url = `https://www.wanikani.com/vocabulary/${vocab}`;
-
-      let style = 'margin-right: 15px;';
-      if (vocab === currentVocab) {
-        style += 'color: black;';
-      }
-
-      const link = `<a href="${url}" style="${style}" target="_blank" rel="noopener noreferrer">${vocab}</a>`;
-
-      const entry = {
-        vocab,
-        url,
-        link,
-      };
-
-      currentGroup.push(entry);
+      const vocabEntry = createVocabEntry(vocab);
+      currentGroup.push(vocabEntry);
     });
 
     return groups;
-  };
-
-  const addAllLinkToGroups = groups => {
-    groups
-      .filter(g => g.length > 1)
-      .forEach(g => {
-        const onclick =
-          g
-            .filter(entry => entry.vocab !== currentVocab)
-            .map(entry => entry.url)
-            // _blank is needed for Firefox
-            .map(url => `window.open('${url}', '_blank');`)
-            .join('') + 'return false;';
-
-        const allLink = `<a href="#" onclick="${onclick}">All</a>`;
-
-        const entry = {
-          link: allLink,
-        };
-
-        g.push(entry);
-      });
   };
 
   const generateLinkSectionContent = groups => {
@@ -168,8 +173,6 @@ MIT
     const note = noteElement.innerHTML;
 
     const groups = parseGroupsFromNote(note);
-
-    addAllLinkToGroups(groups);
 
     let linkSectionElement = getOrCreateElement({
       className: 'link-section',
