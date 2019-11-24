@@ -105,7 +105,7 @@ MIT
 
     let style = 'margin-right: 15px;';
     if (item === currentItem) {
-      style += 'color: black;';
+      style += 'color: #666666;';
     }
 
     const link = `<a href="${url}" style="${style}" target="_blank" rel="noopener noreferrer">${item}</a>`;
