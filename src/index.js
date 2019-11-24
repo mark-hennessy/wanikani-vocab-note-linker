@@ -2,7 +2,7 @@
 // @name         WaniKani Vocabulary Linker
 // @namespace    http://tampermonkey.net/
 // @description  Creates links for vocabulary in the Meaning Note and Reading Note sections.
-// @version      1.4.0
+// @version      1.4.1
 // @author       Mark Hennessy
 // @match        https://www.wanikani.com/vocabulary/*
 // @match        https://www.wanikani.com/kanji/*
@@ -118,11 +118,18 @@ MIT
   };
 
   const createAllEntry = group => {
+    const urls = group
+      .filter(entry => entry.item !== currentItem)
+      // Ignore 'All' links
+      .filter(entry => !!entry.url)
+      .map(entry => entry.url);
+
+    const uniqueURLs = [...new Set(urls)];
+
     const onclick =
-      group
-        .filter(entry => entry.item !== currentItem && !!entry.url)
+      uniqueURLs
         // _blank is needed for Firefox
-        .map(entry => `window.open('${entry.url}', '_blank');`)
+        .map(url => `window.open('${url}', '_blank');`)
         .join('') + 'return false;';
 
     const allLink = `<a href="#" onclick="${onclick}">All</a>`;
