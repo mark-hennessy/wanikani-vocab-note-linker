@@ -27,12 +27,12 @@ Constraints & Limitations
 ==
 * The script only works for vocabulary at the start of each new line
 * The script only works for vocabulary immediately followed by a Japanese opening parenthesis `（`
-* Chrome for mobile does not allow add-ons and thus does not support Tampermonkey UserScripts
+* Chrome mobile does not allow add-ons and thus does not support Tampermonkey UserScripts
 * The `All` link will only work if you enable multiple popups/tabs in your browser settings
 
-How to use UserScripts on Firefox for mobile
+How to use UserScripts on Firefox mobile
 ==
-1. Install Firefox for mobile
+1. Install Firefox on your phone
 2. Open Firefox and install [Tampermonkey](https://addons.mozilla.org/en-US/android/addon/tampermonkey/)
 3. Find and install scripts from [GreasyFork](https://greasyfork.org/en/scripts?utf8=%E2%9C%93&q=wanikani)
 
