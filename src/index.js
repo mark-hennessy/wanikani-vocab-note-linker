@@ -18,8 +18,9 @@ Take a look at the screenshots and try the [CodeSandbox Demo!](https://codesandb
 
 Example Meaning Note
 ==
-木材（もくざい）Wood, Lumber 木材
+木材（もくざい）Wood, Lumber
 材木（ざいもく）Lumber, Timber, Wood
+
 Some text
 
 Constraints & Limitations
