@@ -2,7 +2,7 @@
 // @name         WaniKani Vocabulary Linker
 // @namespace    http://tampermonkey.net/
 // @description  Creates links for vocabulary in the Meaning Note and Reading Note sections.
-// @version      1.3.0
+// @version      1.3.1
 // @author       Mark Hennessy
 // @match        https://www.wanikani.com/vocabulary/*
 // @match        https://www.wanikani.com/kanji/*
@@ -136,15 +136,14 @@ MIT
     const groups = [[]];
 
     const lines = note.split('<br>').map(line => line.trim());
-    lines.forEach((line, lineIndex) => {
-      const isLastLine = lineIndex === lines.length - 1;
+    lines.forEach(line => {
       const group = groups[groups.length - 1];
 
       // Match anything followed by a Japanese opening parenthesis and assume it's kanji
       const matchResult = line.match(/^(.*)（/);
 
       if (!matchResult) {
-        if (group.length && !isLastLine) {
+        if (group.length) {
           // Start a new group
           groups.push([]);
         }
@@ -158,14 +157,19 @@ MIT
       group.push(itemEntry);
     });
 
-    return groups;
+    // There may be empty groups that need to be filtered out
+    // if the note ended in blank lines or remarks.
+    const groupsWithEntries = groups.filter(group => group.length);
+
+    return groupsWithEntries;
   };
 
   const addAllLinkToGroups = groups => {
     return groups.map(group => {
       if (group.length <= 1) return group;
 
-      return [...group, createAllEntry(group)];
+      const allEntry = createAllEntry(group);
+      return [...group, allEntry];
     });
   };
 

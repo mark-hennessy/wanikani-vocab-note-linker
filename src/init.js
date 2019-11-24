@@ -38,6 +38,8 @@ document.getElementById('app').innerHTML = `
   <h2>Reading Note</h2>
   <div class="note-reading noSwipe">
     ${note}
+    <br>
+    <br>
   </div>
 </div>
 `;
