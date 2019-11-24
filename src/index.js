@@ -170,7 +170,7 @@ MIT
 
   const addAllLinks = groups => {
     return groups.map(group => {
-      if (group.length <= 1) return group;
+      if (group.length < 2) return group;
 
       const allEntry = createAllEntry(group);
       return [...group, allEntry];
@@ -178,6 +178,8 @@ MIT
   };
 
   const addEverythingLink = groups => {
+    if (groups.length < 2) return;
+
     return [...groups, [createEverythingEntry(groups)]];
   };
 
