@@ -2,7 +2,7 @@
 // @name         WaniKani Vocabulary Linker
 // @namespace    http://tampermonkey.net/
 // @description  Creates links for vocabulary in the Meaning Note and Reading Note sections.
-// @version      1.3.2
+// @version      1.4.0
 // @author       Mark Hennessy
 // @match        https://www.wanikani.com/vocabulary/*
 // @match        https://www.wanikani.com/kanji/*
@@ -120,10 +120,9 @@ MIT
   const createAllEntry = group => {
     const onclick =
       group
-        .filter(entry => entry.item !== currentItem)
-        .map(entry => entry.url)
+        .filter(entry => entry.item !== currentItem && !!entry.url)
         // _blank is needed for Firefox
-        .map(url => `window.open('${url}', '_blank');`)
+        .map(entry => `window.open('${entry.url}', '_blank');`)
         .join('') + 'return false;';
 
     const allLink = `<a href="#" onclick="${onclick}">All</a>`;
@@ -131,6 +130,10 @@ MIT
     return {
       link: allLink,
     };
+  };
+
+  const createEverythingEntry = groups => {
+    return createAllEntry(groups.flatMap(group => group));
   };
 
   const parseGroupsFromNote = note => {
@@ -165,13 +168,17 @@ MIT
     return groupsWithEntries;
   };
 
-  const addAllLinkToGroups = groups => {
+  const addAllLinks = groups => {
     return groups.map(group => {
       if (group.length <= 1) return group;
 
       const allEntry = createAllEntry(group);
       return [...group, allEntry];
     });
+  };
+
+  const addEverythingLink = groups => {
+    return [...groups, [createEverythingEntry(groups)]];
   };
 
   const generateLinkSectionContent = groups => {
@@ -188,7 +195,8 @@ MIT
     const note = noteElement.innerHTML;
 
     let groups = parseGroupsFromNote(note);
-    groups = addAllLinkToGroups(groups);
+    groups = addAllLinks(groups);
+    groups = addEverythingLink(groups);
 
     let linkSectionElement = getOrCreateElement({
       className: 'link-section',
