@@ -30,13 +30,13 @@ Constraints & Limitations
 * Chrome mobile does not allow add-ons and thus does not support Tampermonkey UserScripts
 * The `All` link will only work if you enable multiple popups/tabs in your browser settings
 
-How to use UserScripts on Firefox mobile
+How to use UserScripts in Firefox mobile
 ==
 1. Install Firefox on your phone
 2. Open Firefox and install [Tampermonkey](https://addons.mozilla.org/en-US/android/addon/tampermonkey/)
 3. Find and install scripts from [GreasyFork](https://greasyfork.org/en/scripts?utf8=%E2%9C%93&q=wanikani)
 
-Enable multiple popups/tabs in Firefox for Android (probably iOS as well)
+Enable multiple popups/tabs in Firefox on Android (probably iOS as well)
 ==
 1. Type `about:config` in the URL bar
 2. Search for `popups`
