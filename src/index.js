@@ -178,7 +178,7 @@ MIT
   };
 
   const addEverythingLink = groups => {
-    if (groups.length < 2) return;
+    if (groups.length < 2) return groups;
 
     return [...groups, [createEverythingEntry(groups)]];
   };
