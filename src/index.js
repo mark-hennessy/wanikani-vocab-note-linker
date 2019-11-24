@@ -157,7 +157,7 @@ MIT
       group.push(itemEntry);
     });
 
-    // There may be empty groups that need to be filtered out
+    // There may be empty groups, that need to be filtered out,
     // if the note ended in blank lines or remarks.
     const groupsWithEntries = groups.filter(group => group.length);
 
