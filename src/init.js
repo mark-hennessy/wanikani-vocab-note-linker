@@ -28,6 +28,11 @@ const note = `
 
 document.getElementById('app').innerHTML = `
 <header>
+  <div class="logo">
+    <h1>WaniKani</h1>
+  </div>
+</header>
+<header>
   <h1>
     <a class="level-icon" href="#" onclick="return false;">54</a>
     <span>大変</span>

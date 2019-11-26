@@ -106,7 +106,7 @@ MIT
     : 'vocabulary';
 
   const screenScrapeCurrentVocabEntry = () => {
-    const headerElement = document.querySelector('header h1');
+    const headerElement = document.querySelector('header > h1');
     const primaryMeaning = headerElement.lastChild.textContent.trim();
 
     const alternativeMeaningsElement = document.querySelector(
