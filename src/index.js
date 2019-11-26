@@ -100,8 +100,6 @@ MIT
 
   const currentVocab = pathInfo[pathInfo.length - 1];
 
-  const parseLine = vocab => {};
-
   const createUrl = vocab => {
     return `https://www.wanikani.com/${currentVocabType}/${vocab}`;
   };
@@ -115,15 +113,60 @@ MIT
     return `<a href="${url}" style="${style}" target="_blank" rel="noopener noreferrer">${vocab}</a>`;
   };
 
-  const createVocabEntry = vocab => {
+  const parseVocabEntry = line => {
+    // Match text before a Japanese opening parenthesis and assume it's kanji
+    const vocabMatchResult = line.match(/^(.*)（/);
+
+    // Math text between Japanese opening and closing parentheses and assume it's kana
+    const kanaMatchResult = line.match(/^.*（(.*)）/);
+
+    // Match text after Japanese opening and closing parentheses and assume it's a list of English meanings
+    const meaningsMatchResult = line.match(/^.*（.*）(.*)/);
+
+    if (!vocabMatchResult) return null;
+
+    const vocab = vocabMatchResult[1];
+    const kana = kanaMatchResult ? kanaMatchResult[1] : null;
+    const meanings = meaningsMatchResult ? meaningsMatchResult[1] : null;
     const url = createUrl(vocab);
     const link = createLink(url, vocab);
 
     return {
       vocab,
+      kana,
+      meanings,
       url,
       link,
     };
+  };
+
+  const parseGroups = note => {
+    const groups = [[]];
+
+    const lines = note.split('<br>').map(line => line.trim());
+    lines.forEach(line => {
+      const currentGroup = groups[groups.length - 1];
+
+      const vocabEntry = parseVocabEntry(line);
+
+      if (!vocabEntry) {
+        if (currentGroup.length) {
+          // Start a new group
+          groups.push([]);
+        }
+
+        // Continue to the next line
+        return;
+      }
+
+      currentGroup.push(vocabEntry);
+    });
+
+    // There may be empty groups, that need to be filtered out,
+    // if the note ended in blank lines or remarks.
+    const groupsWithEntries = groups.filter(group => group.length);
+
+    return groupsWithEntries;
   };
 
   const createAllEntry = group => {
@@ -148,42 +191,6 @@ MIT
     };
   };
 
-  const createEverythingEntry = groups => {
-    return createAllEntry(groups.flatMap(group => group));
-  };
-
-  const parseGroupsFromNote = note => {
-    const groups = [[]];
-
-    const lines = note.split('<br>').map(line => line.trim());
-    lines.forEach(line => {
-      const group = groups[groups.length - 1];
-
-      // Match anything followed by a Japanese opening parenthesis and assume it's kanji
-      const matchResult = line.match(/^(.*)（/);
-
-      if (!matchResult) {
-        if (group.length) {
-          // Start a new group
-          groups.push([]);
-        }
-
-        // Continue to the next line
-        return;
-      }
-
-      const vocab = matchResult[1];
-      const vocabEntry = createVocabEntry(vocab);
-      group.push(vocabEntry);
-    });
-
-    // There may be empty groups, that need to be filtered out,
-    // if the note ended in blank lines or remarks.
-    const groupsWithEntries = groups.filter(group => group.length);
-
-    return groupsWithEntries;
-  };
-
   const addAllLinks = groups => {
     return groups.map(group => {
       if (group.length < 2) return group;
@@ -191,6 +198,10 @@ MIT
       const allEntry = createAllEntry(group);
       return [...group, allEntry];
     });
+  };
+
+  const createEverythingEntry = groups => {
+    return createAllEntry(groups.flatMap(group => group));
   };
 
   const addEverythingLink = groups => {
@@ -212,7 +223,7 @@ MIT
     const noteParentElement = noteElement.parentElement;
     const note = noteElement.innerHTML;
 
-    let groups = parseGroupsFromNote(note);
+    let groups = parseGroups(note);
     groups = addAllLinks(groups);
     groups = addEverythingLink(groups);
 
