@@ -117,13 +117,13 @@ MIT
     // Match text before a Japanese opening parenthesis and assume it's kanji
     const vocabMatchResult = line.match(/^(.*)（/);
 
+    if (!vocabMatchResult) return null;
+
     // Math text between Japanese opening and closing parentheses and assume it's kana
     const kanaMatchResult = line.match(/^.*（(.*)）/);
 
     // Match text after Japanese opening and closing parentheses and assume it's a list of English meanings
     const meaningsMatchResult = line.match(/^.*（.*）(.*)/);
-
-    if (!vocabMatchResult) return null;
 
     const vocab = vocabMatchResult[1];
     const kana = kanaMatchResult ? kanaMatchResult[1] : null;
