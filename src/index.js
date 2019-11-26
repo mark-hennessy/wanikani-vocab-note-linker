@@ -119,21 +119,21 @@ MIT
 
     if (!vocabMatchResult) return null;
 
-    // Math text between Japanese opening and closing parentheses and assume it's kana
-    const kanaMatchResult = line.match(/^.*（(.*)）/);
+    // Math text between Japanese opening and closing parentheses and assume it's metadata
+    const metaMatchResult = line.match(/^.*（(.*)）/);
 
     // Match text after Japanese opening and closing parentheses and assume it's a list of English meanings
     const meaningsMatchResult = line.match(/^.*（.*）(.*)/);
 
     const vocab = vocabMatchResult[1];
-    const kana = kanaMatchResult ? kanaMatchResult[1] : null;
+    const meta = metaMatchResult ? metaMatchResult[1] : null;
     const meanings = meaningsMatchResult ? meaningsMatchResult[1] : null;
     const url = createUrl(vocab);
     const link = createLink(url, vocab);
 
     return {
       vocab,
-      kana,
+      meta,
       meanings,
       url,
       link,
