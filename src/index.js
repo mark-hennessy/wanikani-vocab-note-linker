@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         WaniKani Vocabulary Linker
+// @name         WaniKani Vocab Note Linker
 // @namespace    http://tampermonkey.net/
 // @description  Creates links for vocabulary in the Meaning Note and Reading Note sections.
 // @version      1.4.1
@@ -10,11 +10,11 @@
 // ==/UserScript==
 
 /*
-WaniKani Vocabulary Linker
+WaniKani Vocab Note Linker
 ==
 Creates links for vocabulary in the **Meaning Note** and **Reading Note** sections.
 
-Take a look at the screenshots and try the [CodeSandbox Demo!](https://codesandbox.io/s/wanikani-vocabulary-linker-jzejl)
+Take a look at the screenshots and try the [CodeSandbox Demo!](https://codesandbox.io/s/wanikani-vocab-note-linker-jzejl)
 
 Example Meaning Note
 ==
@@ -50,9 +50,9 @@ Enable multiple popups/tabs in Chrome
 
 Useful Links
 ==
-* [CodeSandbox Demo!](https://codesandbox.io/s/wanikani-vocabulary-linker-jzejl)
+* [CodeSandbox Demo!](https://codesandbox.io/s/wanikani-vocab-note-linker-jzejl)
 * [GreasyFork](https://greasyfork.org/en/scripts/392752-wanikani-vocabulary-linker)
-* [GitHub](https://github.com/mark-hennessy/wanikani-vocabulary-linker)
+* [GitHub](https://github.com/mark-hennessy/wanikani-vocab-note-linker)
 
 License
 ==
@@ -94,24 +94,33 @@ MIT
   const isWaniKani = window.location.host === 'www.wanikani.com';
   const pathInfo = decodeURI(window.location.pathname).split('/');
 
-  const currentItemType = isWaniKani
+  const currentVocabType = isWaniKani
     ? pathInfo[pathInfo.length - 2]
     : 'vocabulary';
 
-  const currentItem = pathInfo[pathInfo.length - 1];
+  const currentVocab = pathInfo[pathInfo.length - 1];
 
-  const createItemEntry = item => {
-    const url = `https://www.wanikani.com/${currentItemType}/${item}`;
+  const parseLine = vocab => {};
 
+  const createUrl = vocab => {
+    return `https://www.wanikani.com/${currentVocabType}/${vocab}`;
+  };
+
+  const createLink = (url, vocab) => {
     let style = 'margin-right: 15px;';
-    if (item === currentItem) {
+    if (vocab === currentVocab) {
       style += 'color: #666666;';
     }
 
-    const link = `<a href="${url}" style="${style}" target="_blank" rel="noopener noreferrer">${item}</a>`;
+    return `<a href="${url}" style="${style}" target="_blank" rel="noopener noreferrer">${vocab}</a>`;
+  };
+
+  const createVocabEntry = vocab => {
+    const url = createUrl(vocab);
+    const link = createLink(url, vocab);
 
     return {
-      item,
+      vocab,
       url,
       link,
     };
@@ -119,7 +128,7 @@ MIT
 
   const createAllEntry = group => {
     const urls = group
-      .filter(entry => entry.item !== currentItem)
+      .filter(entry => entry.vocab !== currentVocab)
       // Ignore 'All' links
       .filter(entry => !!entry.url)
       .map(entry => entry.url);
@@ -163,9 +172,9 @@ MIT
         return;
       }
 
-      const item = matchResult[1];
-      const itemEntry = createItemEntry(item);
-      group.push(itemEntry);
+      const vocab = matchResult[1];
+      const vocabEntry = createVocabEntry(vocab);
+      group.push(vocabEntry);
     });
 
     // There may be empty groups, that need to be filtered out,
