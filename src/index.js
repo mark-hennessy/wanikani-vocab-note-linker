@@ -51,7 +51,7 @@ Enable multiple popups/tabs in Chrome
 Useful Links
 ==
 * [CodeSandbox Demo!](https://codesandbox.io/s/wanikani-vocab-note-linker-jzejl)
-* [GreasyFork](https://greasyfork.org/en/scripts/392752-wanikani-vocabulary-linker)
+* [GreasyFork](https://greasyfork.org/en/scripts/392752-wanikani-vocab-note-linker)
 * [GitHub](https://github.com/mark-hennessy/wanikani-vocab-note-linker)
 
 License
