@@ -72,18 +72,23 @@ MIT
   };
 
   const getOrCreateElement = ({
-    tagName = 'div',
+    tagName,
     className,
-    style,
+    secondaryClassNames,
     parentElement,
+    attributes,
   }) => {
     const selector = `.${className}`;
     let element = parentElement.querySelector(selector);
 
     if (!element) {
       element = document.createElement(tagName);
-      element.className = className;
-      element.style = style;
+      element.className = `${className} ${secondaryClassNames}`;
+
+      for (const attributeKey in attributes) {
+        element.setAttribute(attributeKey, attributes[attributeKey]);
+      }
+
       parentElement.appendChild(element);
     }
 
@@ -94,11 +99,72 @@ MIT
   const isWaniKani = window.location.host === 'www.wanikani.com';
   const pathInfo = decodeURI(window.location.pathname).split('/');
 
+  const currentVocab = isWaniKani ? pathInfo[pathInfo.length - 1] : '大変';
+
   const currentVocabType = isWaniKani
     ? pathInfo[pathInfo.length - 2]
     : 'vocabulary';
 
-  const currentVocab = pathInfo[pathInfo.length - 1];
+  const screenScrapeCurrentVocabEntry = () => {
+    const headerElement = document.querySelector('header h1');
+    const primaryMeaning = headerElement.lastChild.textContent.trim();
+
+    const alternativeMeaningsElement = document.querySelector(
+      '.alternative-meaning',
+    );
+
+    const alternativeMeanings =
+      alternativeMeaningsElement.children[1].innerHTML;
+
+    const meanings = [primaryMeaning, alternativeMeanings].join(', ');
+
+    const readingElements = Array.from(
+      document.querySelectorAll('.pronunciation-group .pronunciation-variant'),
+    );
+
+    const meta = readingElements.map(el => el.innerHTML).join('、');
+
+    return {
+      vocab: currentVocab,
+      meta,
+      meanings,
+    };
+  };
+
+  const createVocabLine = vocabEntry => {
+    return `${vocabEntry.vocab}（${vocabEntry.meta}）${vocabEntry.meanings}`;
+  };
+
+  const injectCopyButton = informationSelector => {
+    if (currentVocabType !== 'vocabulary') return;
+
+    const informationElement = document.querySelector(informationSelector);
+
+    const button = getOrCreateElement({
+      tagName: 'button',
+      className: 'copy-button',
+      // Just use the global WaniKani button styles
+      secondaryClassNames: 'btn btn-mini',
+      parentElement: informationElement,
+      attributes: {
+        type: 'button',
+        // style:
+        //   'width: 3rem; height: 1.5rem; background: #fafafa; border: 2px solid rgba(0,0,0,0.1); cursor: pointer;',
+      },
+    });
+
+    const initialButtonText = 'Copy';
+    button.innerHTML = initialButtonText;
+    button.onclick = () => {
+      const vocabEntry = screenScrapeCurrentVocabEntry();
+      const vocabLine = createVocabLine(vocabEntry);
+      // console.log(vocabLine);
+      navigator.clipboard.writeText(vocabLine);
+
+      button.innerHTML =
+        button.innerHTML === initialButtonText ? 'Copied' : initialButtonText;
+    };
+  };
 
   const createUrl = vocab => {
     return `https://www.wanikani.com/${currentVocabType}/${vocab}`;
@@ -228,6 +294,7 @@ MIT
     groups = addEverythingLink(groups);
 
     let linkSectionElement = getOrCreateElement({
+      tagName: 'div',
       className: 'link-section',
       parentElement: noteParentElement,
     });
@@ -236,7 +303,7 @@ MIT
     linkSectionElement.innerHTML = linkSectionContent;
   };
 
-  const linkify = noteSelector => {
+  const injectLinks = noteSelector => {
     const noteElement = document.querySelector(noteSelector);
     if (!noteElement) return;
 
@@ -249,7 +316,9 @@ MIT
     });
   };
 
-  const noteSelectors = ['.note-meaning', '.note-reading'];
+  const informationSelector = '#information';
+  injectCopyButton(informationSelector);
 
-  noteSelectors.forEach(linkify);
+  const noteSelectors = ['.note-meaning', '.note-reading'];
+  noteSelectors.forEach(injectLinks);
 })();

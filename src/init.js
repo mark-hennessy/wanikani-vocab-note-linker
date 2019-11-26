@@ -27,6 +27,28 @@ const note = `
 `;
 
 document.getElementById('app').innerHTML = `
+<header>
+  <h1>
+    <a class="level-icon" href="#" onclick="return false;">54</a>
+    <span>大変</span>
+    Serious
+  </h1>
+</header>
+<section id="information">
+  <div class="alternative-meaning">
+    <h2>Alternative Meanings</h2>
+    <p>Terrible, Very, Difficult, Hard, Hectic</p>
+  </div>
+</section>
+<section class="vocabulary-reading">
+  <h2>Reading</h2>
+  <div class="pronunciation-group">
+    <p class="pronunciation-variant">たいへん</p>
+  </div>
+  <div class="pronunciation-group">
+    <p class="pronunciation-variant">タイヘン</p>
+  </div>
+<section>
 <div>
   <h2>Meaning Note</h2>
   <div class="note-meaning noSwipe">
