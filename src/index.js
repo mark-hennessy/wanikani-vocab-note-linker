@@ -66,11 +66,6 @@ MIT
     observer.observe(element, { childList: true, subtree: true });
   };
 
-  const isNoteOpen = noteElement => {
-    const noteFirstChild = noteElement.firstChild;
-    return noteFirstChild && noteFirstChild.nodeName === 'FORM';
-  };
-
   const getOrCreateElement = ({
     tagName,
     className,
@@ -295,6 +290,11 @@ MIT
       .map(group => group.map(entry => entry.link))
       .map(group => group.join(''))
       .join('<br>');
+  };
+
+  const isNoteOpen = noteElement => {
+    const noteFirstChild = noteElement.firstChild;
+    return noteFirstChild && noteFirstChild.nodeName === 'FORM';
   };
 
   const updateLinkSection = noteElement => {
