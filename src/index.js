@@ -108,15 +108,18 @@ MIT
   const screenScrapeCurrentVocabEntry = () => {
     const headerElement = document.querySelector('header > h1');
     const primaryMeaning = headerElement.lastChild.textContent.trim();
+    let meanings = primaryMeaning;
 
     const alternativeMeaningsElement = document.querySelector(
-      '.alternative-meaning',
+      '.alternative-meaning:not(.user-synonyms):not(.part-of-speech)',
     );
 
-    const alternativeMeanings =
-      alternativeMeaningsElement.children[1].innerHTML;
+    if (alternativeMeaningsElement) {
+      const alternativeMeanings =
+        alternativeMeaningsElement.children[1].innerHTML;
 
-    const meanings = [primaryMeaning, alternativeMeanings].join(', ');
+      meanings += `, ${alternativeMeanings}`;
+    }
 
     const readingElements = Array.from(
       document.querySelectorAll('.pronunciation-group .pronunciation-variant'),
