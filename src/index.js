@@ -121,11 +121,21 @@ MIT
       meanings += `, ${alternativeMeanings}`;
     }
 
-    const readingElements = Array.from(
-      document.querySelectorAll('.pronunciation-group .pronunciation-variant'),
-    );
+    let readingNodeList;
+    if (currentVocabType === 'vocabulary') {
+      readingNodeList = document.querySelectorAll(
+        '.pronunciation-group .pronunciation-variant',
+      );
+    } else if (currentVocabType === 'kanji') {
+      readingNodeList = document.querySelectorAll(
+        '#components + section p[lang="ja"]',
+      );
+    }
 
-    const meta = readingElements.map(el => el.innerHTML).join('、');
+    const meta = Array.from(readingNodeList)
+      .map(el => el.innerHTML.trim())
+      .filter(v => v !== 'None')
+      .join('、');
 
     return {
       vocab: currentVocab,
@@ -139,7 +149,9 @@ MIT
   };
 
   const injectCopyButton = informationSelector => {
-    if (currentVocabType !== 'vocabulary') return;
+    if (currentVocabType !== 'vocabulary' && currentVocabType !== 'kanji') {
+      return;
+    }
 
     const informationElement = document.querySelector(informationSelector);
 
