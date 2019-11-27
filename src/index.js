@@ -148,19 +148,20 @@ MIT
     return `${vocabEntry.vocab}（${vocabEntry.meta}）${vocabEntry.meanings}`;
   };
 
-  const injectCopyButton = informationSelector => {
+  const injectCopyButton = parentSelector => {
     if (currentVocabType !== 'vocabulary' && currentVocabType !== 'kanji') {
       return;
     }
 
-    const informationElement = document.querySelector(informationSelector);
+    const parentElement = document.querySelector(parentSelector);
+    if (!parentElement) return;
 
     const button = getOrCreateElement({
       tagName: 'button',
       className: 'copy-button',
       // Just use the global WaniKani button styles
       secondaryClassNames: 'btn btn-mini',
-      parentElement: informationElement,
+      parentElement,
       attributes: {
         type: 'button',
       },
@@ -299,24 +300,30 @@ MIT
   const updateLinkSection = noteElement => {
     if (isNoteOpen(noteElement)) return;
 
-    const noteParentElement = noteElement.parentElement;
+    const parentElement = noteElement.parentElement;
+    if (!parentElement) return;
+
     const note = noteElement.innerHTML;
+
+    const linkSectionElement = getOrCreateElement({
+      tagName: 'div',
+      className: 'link-section',
+      parentElement,
+    });
 
     let groups = parseGroups(note);
     groups = addAllLinks(groups);
     groups = addEverythingLink(groups);
-
-    let linkSectionElement = getOrCreateElement({
-      tagName: 'div',
-      className: 'link-section',
-      parentElement: noteParentElement,
-    });
 
     const linkSectionContent = generateLinkSectionContent(groups);
     linkSectionElement.innerHTML = linkSectionContent;
   };
 
   const injectLinks = noteSelector => {
+    if (currentVocabType !== 'vocabulary' && currentVocabType !== 'kanji') {
+      return;
+    }
+
     const noteElement = document.querySelector(noteSelector);
     if (!noteElement) return;
 
@@ -329,9 +336,52 @@ MIT
     });
   };
 
-  const informationSelector = '#information';
-  injectCopyButton(informationSelector);
+  const injectGenerateButton = noteSelector => {
+    if (
+      currentVocabType !== 'vocabulary' /* && currentVocabType !== 'kanji' */
+    ) {
+      return;
+    }
+
+    const noteElement = document.querySelector(noteSelector);
+    if (!noteElement) return;
+
+    if (isNoteOpen(noteElement)) return;
+
+    const parentElement = noteElement.parentElement;
+    if (!parentElement) return;
+
+    const note = noteElement.innerHTML;
+
+    const button = getOrCreateElement({
+      tagName: 'button',
+      className: 'generate-button',
+      // Just use the global WaniKani button styles
+      secondaryClassNames: 'btn btn-mini',
+      parentElement,
+      attributes: {
+        type: 'button',
+      },
+    });
+
+    const initialButtonText = 'Generate';
+    button.innerHTML = initialButtonText;
+    button.onclick = () => {
+      // const currentGroups = parseGroups(note);
+      // const vocabLine = createVocabLine(vocabEntry);
+
+      navigator.clipboard.writeText('TODO');
+
+      button.innerHTML =
+        button.innerHTML === initialButtonText
+          ? 'Generated'
+          : initialButtonText;
+    };
+  };
+
+  injectCopyButton('#information');
 
   const noteSelectors = ['.note-meaning', '.note-reading'];
   noteSelectors.forEach(injectLinks);
+  noteSelectors.forEach(injectGenerateButton);
 })();
