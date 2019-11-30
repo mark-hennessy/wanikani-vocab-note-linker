@@ -284,7 +284,7 @@ MIT
 
   const addEverythingLink = groups => {
     const groupsWithAtLeastOneUrl = groups.filter(
-      group => group.filter(entry => entry.url).length > 0,
+      group => group.filter(entry => entry.url).length,
     );
 
     return groupsWithAtLeastOneUrl.length > 1
