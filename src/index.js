@@ -2,7 +2,7 @@
 // @name         WaniKani Vocab Note Linker
 // @namespace    http://tampermonkey.net/
 // @description  Creates links for vocabulary in the Meaning Note and Reading Note sections.
-// @version      1.5.0
+// @version      1.5.1
 // @author       Mark Hennessy
 // @match        https://www.wanikani.com/vocabulary/*
 // @match        https://www.wanikani.com/kanji/*
@@ -90,6 +90,9 @@ MIT
     return element;
   };
   // END Utilities
+
+  // eslint-disable-next-line
+  const wkof = wkof;
 
   const isWaniKani = window.location.host === 'www.wanikani.com';
   const pathInfo = decodeURI(window.location.pathname).split('/');
@@ -191,25 +194,27 @@ MIT
   const parseVocabEntry = line => {
     // Match text before a Japanese opening parenthesis and assume it's kanji
     const vocabMatchResult = line.match(/^(.*)（/);
-
     if (!vocabMatchResult) return null;
+
+    const vocab = vocabMatchResult[1];
 
     // Math text between Japanese opening and closing parentheses and assume it's metadata
     const metaMatchResult = line.match(/^.*（(.*)）/);
+    const meta = metaMatchResult ? metaMatchResult[1] : null;
 
     // Match text after Japanese opening and closing parentheses and assume it's a list of English meanings
     const meaningsMatchResult = line.match(/^.*（.*）(.*)/);
-
-    const vocab = vocabMatchResult[1];
-    const meta = metaMatchResult ? metaMatchResult[1] : null;
     const meanings = meaningsMatchResult ? meaningsMatchResult[1] : null;
-    const url = createUrl(vocab);
-    const link = createLink(url, vocab);
+
+    const isOnWaniKani = !/(not on WK|not in WK)/.test(meta);
+    const url = isOnWaniKani ? createUrl(vocab) : null;
+    const link = isOnWaniKani ? createLink(url, vocab) : null;
 
     return {
       vocab,
       meta,
       meanings,
+      isOnWaniKani,
       url,
       link,
     };
@@ -247,8 +252,8 @@ MIT
   const createAllEntry = group => {
     const urls = group
       .filter(entry => entry.vocab !== currentVocab)
-      // Ignore 'All' links
-      .filter(entry => !!entry.url)
+      // Ignore 'All' and 'not on/in WK' entries
+      .filter(entry => entry.url)
       .map(entry => entry.url);
 
     const uniqueURLs = [...new Set(urls)];
@@ -352,6 +357,7 @@ MIT
     if (!parentElement) return;
 
     const note = noteElement.innerHTML;
+    const groups = parseGroups(note);
 
     const button = getOrCreateElement({
       tagName: 'button',
@@ -367,7 +373,8 @@ MIT
     const initialButtonText = 'Generate';
     button.innerHTML = initialButtonText;
     button.onclick = () => {
-      // const currentGroups = parseGroups(note);
+      // wkof.
+
       // const vocabLine = createVocabLine(vocabEntry);
 
       navigator.clipboard.writeText('TODO');
@@ -383,5 +390,8 @@ MIT
 
   const noteSelectors = ['.note-meaning', '.note-reading'];
   noteSelectors.forEach(injectLinks);
-  noteSelectors.forEach(injectGenerateButton);
+
+  // wkof.include('ItemData');
+  // wkof.ready('ItemData').then(do_something);
+  // noteSelectors.forEach(injectGenerateButton);
 })();
