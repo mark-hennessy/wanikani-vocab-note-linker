@@ -268,12 +268,15 @@ MIT
     };
   };
 
+  const groupHasMultipleUrls = group => {
+    return group.filter(entry => entry.url).length > 1;
+  };
+
   const addAllLinks = groups => {
     return groups.map(group => {
-      if (group.length < 2) return group;
-
-      const allEntry = createAllEntry(group);
-      return [...group, allEntry];
+      return groupHasMultipleUrls(group)
+        ? [...group, createAllEntry(group)]
+        : group;
     });
   };
 
@@ -282,13 +285,14 @@ MIT
   };
 
   const addEverythingLink = groups => {
-    if (groups.length < 2) return groups;
-
-    return [...groups, [createEverythingEntry(groups)]];
+    return groups.filter(groupHasMultipleUrls).length > 1
+      ? [...groups, [createEverythingEntry(groups)]]
+      : groups;
   };
 
   const generateLinkSectionContent = groups => {
     return groups
+      .filter(group => group.some(entry => entry.link))
       .map(group => group.map(entry => entry.link))
       .map(group => group.join(''))
       .join('<br>');

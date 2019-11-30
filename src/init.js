@@ -24,6 +24,11 @@ const note = `
 本気（ほんき）Serious
 <br>
 基本（きほん）Foundation, Basics
+<br>
+<br>
+空手（からて、not on WK）Karate (a type of Martial Arts)
+<br>
+空オケ（からオケ、not in WK）Karaoke
 `;
 
 document.getElementById('app').innerHTML = `
