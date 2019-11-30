@@ -268,13 +268,11 @@ MIT
     };
   };
 
-  const groupHasMultipleUrls = group => {
-    return group.filter(entry => entry.url).length > 1;
-  };
-
   const addAllLinks = groups => {
     return groups.map(group => {
-      return groupHasMultipleUrls(group)
+      const entriesWithUrls = group.filter(entry => entry.url);
+
+      return entriesWithUrls.length > 1
         ? [...group, createAllEntry(group)]
         : group;
     });
@@ -285,7 +283,11 @@ MIT
   };
 
   const addEverythingLink = groups => {
-    return groups.filter(groupHasMultipleUrls).length > 1
+    const groupsWithAtLeastOneUrl = groups.filter(
+      group => group.filter(entry => entry.url).length > 0,
+    );
+
+    return groupsWithAtLeastOneUrl.length > 1
       ? [...groups, [createEverythingEntry(groups)]]
       : groups;
   };
