@@ -356,7 +356,7 @@ MIT
     });
   };
 
-  const injectGenerateButton = noteSelector => {
+  const injectUpdateNoteButton = noteSelector => {
     if (currentVocabType !== 'vocabulary' && currentVocabType !== 'kanji') {
       return;
     }
@@ -369,7 +369,7 @@ MIT
 
     const button = getOrCreateElement({
       tagName: 'button',
-      className: 'generate-button',
+      className: 'update-note-button',
       // Just use the global WaniKani button styles
       secondaryClassNames: 'btn btn-mini',
       parentElement,
@@ -378,7 +378,7 @@ MIT
       },
     });
 
-    const initialButtonText = 'Generate';
+    const initialButtonText = 'Update note';
     button.innerHTML = initialButtonText;
     button.onclick = async () => {
       // The note, i.e. rich text editor, will have a different DOM structure
@@ -455,5 +455,5 @@ MIT
 
   const noteSelectors = ['.note-meaning', '.note-reading'];
   noteSelectors.forEach(injectLinks);
-  noteSelectors.forEach(injectGenerateButton);
+  noteSelectors.forEach(injectUpdateNoteButton);
 })();
