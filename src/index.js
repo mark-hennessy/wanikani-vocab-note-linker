@@ -315,6 +315,9 @@ MIT
   };
 
   const updateLinkSection = noteElement => {
+    // The note, i.e. rich text editor, will never be open when this function
+    // is called on initial script load, but it might be open when this function
+    // is called by the DOM mutation handler. 
     if (isNoteOpen(noteElement)) return;
 
     const parentElement = noteElement.parentElement;
@@ -361,8 +364,6 @@ MIT
     const noteElement = document.querySelector(noteSelector);
     if (!noteElement) return;
 
-    if (isNoteOpen(noteElement)) return;
-
     const parentElement = noteElement.parentElement;
     if (!parentElement) return;
 
@@ -380,7 +381,12 @@ MIT
     const initialButtonText = 'Generate';
     button.innerHTML = initialButtonText;
     button.onclick = async () => {
+      // The note, i.e. rich text editor, will have a different DOM structure
+      // when open, so don't do anything.
+      if (isNoteOpen(noteElement)) return;
+
       /* eslint-disable no-undef */
+      // wkof is a global variable added by another UserScript.
       wkof.include('ItemData');
       await wkof.ready('ItemData');
 
@@ -388,12 +394,17 @@ MIT
         wk_items: {
           options: { subjects: true },
           filters: {
-            item_type: 'rad, kan',
+            item_type: 'kan, voc',
           },
         },
       };
 
+      // The WaniKani API supports an updated_after param to request data 
+      // that changed after a certain timestamp.
+      // The Wanikani Open Framework (wkof) uses this updated_after param 
+      // to update it's local cache efficiently.
       const items = await wkof.ItemData.get_items(config);
+
       const typeIndex = wkof.ItemData.get_index(items, 'item_type');
       const vocabList = typeIndex[currentVocabType];
       const slugIndex = wkof.ItemData.get_index(vocabList, 'slug');
@@ -424,7 +435,7 @@ MIT
       });
 
       const newNote = createNoteFromLines(lines);
-
+      noteElement.innerHTML = newNote;
       navigator.clipboard.writeText(newNote);
 
       button.innerHTML =
