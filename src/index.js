@@ -387,14 +387,14 @@ MIT
 
       // wkof is a global variable added by another UserScript.
       // eslint-disable-next-line
-      const wkof = wkof || {
+      const wkofOrStub = wkof || {
         include: () => {},
         ready: () => {},
         ItemData: { get_items: () => [], get_index: () => [] },
       };
 
-      wkof.include('ItemData');
-      await wkof.ready('ItemData');
+      wkofOrStub.include('ItemData');
+      await wkofOrStub.ready('ItemData');
 
       const config = {
         wk_items: {
@@ -409,11 +409,11 @@ MIT
       // that changed after a certain timestamp.
       // The Wanikani Open Framework (wkof) uses this updated_after param
       // to update it's local cache efficiently.
-      const items = await wkof.ItemData.get_items(config);
+      const items = await wkofOrStub.ItemData.get_items(config);
 
-      const typeIndex = wkof.ItemData.get_index(items, 'item_type');
+      const typeIndex = wkofOrStub.ItemData.get_index(items, 'item_type');
       const vocabList = typeIndex[currentVocabType];
-      const slugIndex = wkof.ItemData.get_index(vocabList, 'slug');
+      const slugIndex = wkofOrStub.ItemData.get_index(vocabList, 'slug');
 
       const note = noteElement.innerHTML;
       const groups = parseGroups(note);
