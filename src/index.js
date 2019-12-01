@@ -2,7 +2,7 @@
 // @name         WaniKani Vocab Note Linker
 // @namespace    http://tampermonkey.net/
 // @description  Creates links for vocabulary in the Meaning Note and Reading Note sections.
-// @version      1.5.3
+// @version      1.6.0
 // @author       Mark Hennessy
 // @match        https://www.wanikani.com/vocabulary/*
 // @match        https://www.wanikani.com/kanji/*
@@ -317,7 +317,7 @@ MIT
   const updateLinkSection = noteElement => {
     // The note, i.e. rich text editor, will never be open when this function
     // is called on initial script load, but it might be open when this function
-    // is called by the DOM mutation handler. 
+    // is called by the DOM mutation handler.
     if (isNoteOpen(noteElement)) return;
 
     const parentElement = noteElement.parentElement;
@@ -385,8 +385,14 @@ MIT
       // when open, so don't do anything.
       if (isNoteOpen(noteElement)) return;
 
-      /* eslint-disable no-undef */
       // wkof is a global variable added by another UserScript.
+      // eslint-disable-next-line
+      const wkof = wkof || {
+        include: () => {},
+        ready: () => {},
+        ItemData: { get_items: () => [], get_index: () => [] },
+      };
+
       wkof.include('ItemData');
       await wkof.ready('ItemData');
 
@@ -399,9 +405,9 @@ MIT
         },
       };
 
-      // The WaniKani API supports an updated_after param to request data 
+      // The WaniKani API supports an updated_after param to request data
       // that changed after a certain timestamp.
-      // The Wanikani Open Framework (wkof) uses this updated_after param 
+      // The Wanikani Open Framework (wkof) uses this updated_after param
       // to update it's local cache efficiently.
       const items = await wkof.ItemData.get_items(config);
 
@@ -440,7 +446,7 @@ MIT
 
       button.innerHTML =
         button.innerHTML === initialButtonText
-          ? 'Generated'
+          ? 'Manually open note to save'
           : initialButtonText;
     };
   };
