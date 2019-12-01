@@ -188,7 +188,7 @@ MIT
     return `<a href="${url}" style="${style}" target="_blank" rel="noopener noreferrer">${vocab}</a>`;
   };
 
-  const parseVocabEntry = line => {
+  const parseVocabEntry = (line, lineIndex) => {
     // Match text before a Japanese opening parenthesis and assume it's kanji
     const vocabMatchResult = line.match(/^(.*)（/);
     if (!vocabMatchResult) return null;
@@ -211,20 +211,29 @@ MIT
       vocab,
       meta,
       meanings,
-      isOnWaniKani,
       url,
       link,
+      isOnWaniKani,
+      lineIndex,
     };
+  };
+
+  const splitNoteIntoLines = note => {
+    return note.split('<br>').map(line => line.trim());
+  };
+
+  const createNoteFromLines = lines => {
+    return lines.join('<br>');
   };
 
   const parseGroups = note => {
     const groups = [[]];
 
-    const lines = note.split('<br>').map(line => line.trim());
-    lines.forEach(line => {
+    const lines = splitNoteIntoLines(note);
+    lines.forEach((line, lineIndex) => {
       const currentGroup = groups[groups.length - 1];
 
-      const vocabEntry = parseVocabEntry(line);
+      const vocabEntry = parseVocabEntry(line, lineIndex);
 
       if (!vocabEntry) {
         if (currentGroup.length) {
@@ -345,9 +354,7 @@ MIT
   };
 
   const injectGenerateButton = noteSelector => {
-    if (
-      currentVocabType !== 'vocabulary' /* && currentVocabType !== 'kanji' */
-    ) {
+    if (currentVocabType !== 'vocabulary' && currentVocabType !== 'kanji') {
       return;
     }
 
@@ -358,9 +365,6 @@ MIT
 
     const parentElement = noteElement.parentElement;
     if (!parentElement) return;
-
-    const note = noteElement.innerHTML;
-    const groups = parseGroups(note);
 
     const button = getOrCreateElement({
       tagName: 'button',
@@ -375,12 +379,53 @@ MIT
 
     const initialButtonText = 'Generate';
     button.innerHTML = initialButtonText;
-    button.onclick = () => {
-      // wkof.
+    button.onclick = async () => {
+      /* eslint-disable no-undef */
+      wkof.include('ItemData');
+      await wkof.ready('ItemData');
 
-      // const vocabLine = createVocabLine(vocabEntry);
+      const config = {
+        wk_items: {
+          options: { subjects: true },
+          filters: {
+            item_type: 'rad, kan',
+          },
+        },
+      };
 
-      navigator.clipboard.writeText('TODO');
+      const items = await wkof.ItemData.get_items(config);
+      const typeIndex = wkof.ItemData.get_index(items, 'item_type');
+      const vocabList = typeIndex[currentVocabType];
+      const slugIndex = wkof.ItemData.get_index(vocabList, 'slug');
+
+      const note = noteElement.innerHTML;
+      const groups = parseGroups(note);
+      const wkEntries = groups
+        .flatMap(group => group)
+        .filter(entry => entry.isOnWaniKani);
+
+      const lines = splitNoteIntoLines(note);
+
+      wkEntries.forEach(entry => {
+        const vocabInfo = slugIndex[entry.vocab];
+        if (!vocabInfo) return;
+
+        const { data } = vocabInfo;
+        const newMeta = data.readings.map(v => v.reading).join('、');
+        const newMeanings = data.meanings.map(v => v.meaning).join(', ');
+
+        const updatedLine = createVocabLine({
+          vocab: entry.vocab,
+          meta: entry.meta || newMeta,
+          meanings: newMeanings,
+        });
+
+        lines[entry.lineIndex] = updatedLine;
+      });
+
+      const newNote = createNoteFromLines(lines);
+
+      navigator.clipboard.writeText(newNote);
 
       button.innerHTML =
         button.innerHTML === initialButtonText
@@ -393,8 +438,5 @@ MIT
 
   const noteSelectors = ['.note-meaning', '.note-reading'];
   noteSelectors.forEach(injectLinks);
-
-  // wkof.include('ItemData');
-  // wkof.ready('ItemData').then(do_something);
-  // noteSelectors.forEach(injectGenerateButton);
+  noteSelectors.forEach(injectGenerateButton);
 })();
