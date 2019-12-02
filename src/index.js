@@ -93,16 +93,6 @@ MIT
 
   const isWaniKani = window.location.host === 'www.wanikani.com';
 
-  if (!isWaniKani) {
-    // wkof is a global variable added by another UserScript.
-    // eslint-disable-next-line
-    var wkof = {
-      include: () => {},
-      ready: () => {},
-      ItemData: { get_items: () => [], get_index: () => [] },
-    };
-  }
-
   const pathInfo = decodeURI(window.location.pathname).split('/');
 
   const currentVocab = isWaniKani ? pathInfo[pathInfo.length - 1] : '大変';
@@ -396,6 +386,8 @@ MIT
       // when open, so don't do anything.
       if (isNoteOpen(noteElement)) return;
 
+      /* eslint-disable no-undef */
+      // wkof is a global variable added by another UserScript.
       wkof.include('ItemData');
       await wkof.ready('ItemData');
 
