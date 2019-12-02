@@ -180,8 +180,10 @@ MIT
     return `https://www.wanikani.com/${currentVocabType}/${vocab}`;
   };
 
+  const linkStyle = 'margin-right: 15px;';
+
   const createLink = (url, vocab) => {
-    let style = 'margin-right: 15px;';
+    let style = linkStyle;
     if (vocab === currentVocab) {
       style += 'color: #666666;';
     }
@@ -271,7 +273,7 @@ MIT
         .map(url => `window.open('${url}', '_blank');`)
         .join('') + 'return false;';
 
-    const allLink = `<a href="#" onclick="${onclick}">All</a>`;
+    const allLink = `<a href="#" style="${linkStyle}" onclick="${onclick}">All</a>`;
 
     return {
       link: allLink,
@@ -284,6 +286,33 @@ MIT
 
       return entriesWithUrls.length > 1
         ? [...group, createAllEntry(group)]
+        : group;
+    });
+  };
+
+  const createCopyEntry = group => {
+    const groupText = group
+      // Ignore the 'All' entry
+      .filter(entry => entry.vocab)
+      .map(createVocabLine)
+      .join('\\n');
+
+    const onclick = `navigator.clipboard.writeText('${groupText}');return false;`;
+
+    const copyLink = `<a href="#" style="${linkStyle}" onclick="${onclick}">Copy</a>`;
+
+    return {
+      link: copyLink,
+    };
+  };
+
+  const addCopyLinks = groups => {
+    return groups.map(group => {
+      const entriesWithVocab = group.filter(entry => entry.vocab);
+
+      // Don't add the 'Copy' entry to the group at the bottom with a single 'All' entry.
+      return entriesWithVocab.length > 0
+        ? [...group, createCopyEntry(group)]
         : group;
     });
   };
@@ -334,6 +363,7 @@ MIT
 
     let groups = parseGroups(note);
     groups = addAllLinks(groups);
+    groups = addCopyLinks(groups);
     groups = addEverythingLink(groups);
 
     const linkSectionContent = generateLinkSectionContent(groups);
