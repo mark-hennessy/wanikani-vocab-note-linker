@@ -180,7 +180,7 @@ MIT
     return `https://www.wanikani.com/${currentVocabType}/${vocab}`;
   };
 
-  const linkStyle = 'margin-right: 15px;';
+  const linkStyle = 'margin-right: 15px;line-height: 1.5rem;';
 
   const createLink = (url, vocab) => {
     let style = linkStyle;
