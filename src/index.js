@@ -291,15 +291,18 @@ MIT
   };
 
   const createCopyEntry = group => {
-    const groupText = group
-      // Ignore the 'All' entry
-      .filter(entry => entry.vocab)
-      .map(createVocabLine)
-      .join('\\n');
+    // Ignore the 'All' entry
+    const entriesWithVocab = group.filter(entry => entry.vocab);
+
+    const linksVisible = entriesWithVocab.some(entry => entry.link);
+
+    const groupText = entriesWithVocab.map(createVocabLine).join('\\n');
 
     const onclick = `navigator.clipboard.writeText('${groupText}');return false;`;
 
-    const copyLink = `<a href="#" style="${linkStyle}" onclick="${onclick}">Copy</a>`;
+    const copyLink = `<a href="#" style="${linkStyle}" onclick="${onclick}">${
+      linksVisible ? 'Copy' : 'Copy (not on WK)'
+    }</a>`;
 
     return {
       link: copyLink,
@@ -370,7 +373,7 @@ MIT
     linkSectionElement.innerHTML = linkSectionContent;
   };
 
-  const injectLinks = noteSelector => {
+  const injectLinkSection = noteSelector => {
     if (currentVocabType !== 'vocabulary' && currentVocabType !== 'kanji') {
       return;
     }
@@ -378,22 +381,20 @@ MIT
     const noteElement = document.querySelector(noteSelector);
     if (!noteElement) return;
 
-    // Initialize the link section
+    // Initialization
     updateLinkSection(noteElement);
 
-    // Register a change handler to keep the link section up to date
+    // Register a DOM change handler
     registerMutationObserver(noteElement, () => {
       updateLinkSection(noteElement);
     });
   };
 
-  const injectUpdateNoteButton = noteSelector => {
-    if (currentVocabType !== 'vocabulary' && currentVocabType !== 'kanji') {
-      return;
-    }
-
-    const noteElement = document.querySelector(noteSelector);
-    if (!noteElement) return;
+  const updateUpdateNoteButton = noteElement => {
+    // The note, i.e. rich text editor, will never be open when this function
+    // is called on initial script load, but it might be open when this function
+    // is called by the DOM mutation handler.
+    if (isNoteOpen(noteElement)) return;
 
     const parentElement = noteElement.parentElement;
     if (!parentElement) return;
@@ -476,9 +477,26 @@ MIT
     };
   };
 
+  const injectUpdateNoteButton = noteSelector => {
+    if (currentVocabType !== 'vocabulary' && currentVocabType !== 'kanji') {
+      return;
+    }
+
+    const noteElement = document.querySelector(noteSelector);
+    if (!noteElement) return;
+
+    // Initialization
+    updateUpdateNoteButton(noteElement);
+
+    // Register a DOM change handler
+    registerMutationObserver(noteElement, () => {
+      updateUpdateNoteButton(noteElement);
+    });
+  };
+
   injectCopyButton('#information');
 
   const noteSelectors = ['.note-meaning', '.note-reading'];
-  noteSelectors.forEach(injectLinks);
+  noteSelectors.forEach(injectLinkSection);
   noteSelectors.forEach(injectUpdateNoteButton);
 })();
