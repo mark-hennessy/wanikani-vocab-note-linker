@@ -294,14 +294,14 @@ MIT
     // Ignore the 'All' entry
     const entriesWithVocab = group.filter(entry => entry.vocab);
 
-    const linksVisible = entriesWithVocab.some(entry => entry.link);
+    const hasLinks = entriesWithVocab.some(entry => entry.link);
 
     const groupText = entriesWithVocab.map(createVocabLine).join('\\n');
 
     const onclick = `navigator.clipboard.writeText('${groupText}');return false;`;
 
     const copyLink = `<a href="#" style="${linkStyle}" onclick="${onclick}">${
-      linksVisible ? 'Copy' : 'Copy (not on WK)'
+      hasLinks ? 'Copy' : 'Copy (not on WK)'
     }</a>`;
 
     return {
