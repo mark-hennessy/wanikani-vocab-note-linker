@@ -454,26 +454,30 @@ MIT
         if (!vocabInfo) return;
 
         const { data } = vocabInfo;
-        const newMeta = data.readings.map(v => v.reading).join('、');
-        const newMeanings = data.meanings.map(v => v.meaning).join(', ');
+        const generatedMeta = data.readings.map(v => v.reading).join('、');
+        const generatedMeanings = data.meanings.map(v => v.meaning).join(', ');
 
-        const updatedLine = createVocabLine({
+        const generatedLine = createVocabLine({
           vocab: entry.vocab,
-          meta: entry.meta || newMeta,
-          meanings: newMeanings,
+          meta: entry.meta || generatedMeta,
+          meanings: generatedMeanings,
         });
 
-        lines[entry.lineIndex] = updatedLine;
+        const { lineIndex } = entry;
+        lines[lineIndex] = generatedLine;
       });
 
-      const newNote = createNoteFromLines(lines);
-      noteElement.innerHTML = newNote;
-      navigator.clipboard.writeText(newNote);
+      const generatedNote = createNoteFromLines(lines);
 
-      button.innerHTML =
-        button.innerHTML === initialButtonText
-          ? 'Manually open note to save'
-          : initialButtonText;
+      if (note !== generatedNote) {
+        noteElement.innerHTML = generatedNote;
+        navigator.clipboard.writeText(generatedNote);
+
+        button.innerHTML =
+          button.innerHTML === initialButtonText
+            ? 'Manually open note to save'
+            : initialButtonText;
+      }
     };
   };
 
