@@ -59,7 +59,7 @@ License
 MIT
 */
 
-(function() {
+(async () => {
   // START Utilities
   const registerMutationObserver = (element, mutationCallback) => {
     const observer = new MutationObserver(mutationCallback);
@@ -88,6 +88,38 @@ MIT
     }
 
     return element;
+  };
+
+  const getSlugDBAsync = async () => {
+    /* eslint-disable no-undef */
+    // wkof is a global variable added by another UserScript.
+    if (typeof wkof === 'undefined') {
+      return [];
+    }
+
+    wkof.include('ItemData');
+    await wkof.ready('ItemData');
+
+    const config = {
+      wk_items: {
+        options: { subjects: true },
+        filters: {
+          item_type: 'kan, voc',
+        },
+      },
+    };
+
+    // The WaniKani API supports an updated_after param to request data
+    // that changed after a certain timestamp.
+    // The Wanikani Open Framework (wkof) uses this updated_after param
+    // to update it's local cache efficiently.
+    const items = await wkof.ItemData.get_items(config);
+
+    const typeDB = wkof.ItemData.get_index(items, 'item_type');
+    const vocabList = typeDB[currentVocabType];
+    const slugDB = wkof.ItemData.get_index(vocabList, 'slug');
+
+    return slugDB;
   };
   // END Utilities
 
@@ -390,7 +422,37 @@ MIT
     });
   };
 
-  const updateUpdateNoteButton = noteElement => {
+  const generateNote = existingNote => {
+    const lines = splitNoteIntoLines(existingNote);
+    const groups = parseGroups(existingNote);
+
+    const wkEntries = groups
+      .flatMap(group => group)
+      .filter(entry => entry.isOnWaniKani);
+
+    wkEntries.forEach(entry => {
+      const vocabInfo = slugDB[entry.vocab];
+      if (!vocabInfo) return;
+
+      const { data } = vocabInfo;
+      const generatedMeta = data.readings.map(v => v.reading).join('、');
+      const generatedMeanings = data.meanings.map(v => v.meaning).join(', ');
+
+      const generatedLine = createVocabLine({
+        vocab: entry.vocab,
+        meta: entry.meta || generatedMeta,
+        meanings: generatedMeanings,
+      });
+
+      const { lineIndex } = entry;
+      lines[lineIndex] = generatedLine;
+    });
+
+    const generatedNote = createNoteFromLines(lines);
+    return generatedNote;
+  };
+
+  const updateUpdateNoteButton = (noteElement, slugDB) => {
     // The note, i.e. rich text editor, will never be open when this function
     // is called on initial script load, but it might be open when this function
     // is called by the DOM mutation handler.
@@ -413,63 +475,10 @@ MIT
     const initialButtonText = 'Update note';
     button.innerHTML = initialButtonText;
     button.onclick = async () => {
-      // The note, i.e. rich text editor, will have a different DOM structure
-      // when open, so don't do anything.
-      if (isNoteOpen(noteElement)) return;
+      const existingNote = noteElement.innerHTML;
+      const generatedNote = generateNote(existingNote);
 
-      /* eslint-disable no-undef */
-      // wkof is a global variable added by another UserScript.
-      wkof.include('ItemData');
-      await wkof.ready('ItemData');
-
-      const config = {
-        wk_items: {
-          options: { subjects: true },
-          filters: {
-            item_type: 'kan, voc',
-          },
-        },
-      };
-
-      // The WaniKani API supports an updated_after param to request data
-      // that changed after a certain timestamp.
-      // The Wanikani Open Framework (wkof) uses this updated_after param
-      // to update it's local cache efficiently.
-      const items = await wkof.ItemData.get_items(config);
-
-      const typeIndex = wkof.ItemData.get_index(items, 'item_type');
-      const vocabList = typeIndex[currentVocabType];
-      const slugIndex = wkof.ItemData.get_index(vocabList, 'slug');
-
-      const note = noteElement.innerHTML;
-      const groups = parseGroups(note);
-      const wkEntries = groups
-        .flatMap(group => group)
-        .filter(entry => entry.isOnWaniKani);
-
-      const lines = splitNoteIntoLines(note);
-
-      wkEntries.forEach(entry => {
-        const vocabInfo = slugIndex[entry.vocab];
-        if (!vocabInfo) return;
-
-        const { data } = vocabInfo;
-        const generatedMeta = data.readings.map(v => v.reading).join('、');
-        const generatedMeanings = data.meanings.map(v => v.meaning).join(', ');
-
-        const generatedLine = createVocabLine({
-          vocab: entry.vocab,
-          meta: entry.meta || generatedMeta,
-          meanings: generatedMeanings,
-        });
-
-        const { lineIndex } = entry;
-        lines[lineIndex] = generatedLine;
-      });
-
-      const generatedNote = createNoteFromLines(lines);
-
-      if (note !== generatedNote) {
+      if (existingNote !== generatedNote) {
         noteElement.innerHTML = generatedNote;
         navigator.clipboard.writeText(generatedNote);
 
@@ -481,7 +490,7 @@ MIT
     };
   };
 
-  const injectUpdateNoteButton = noteSelector => {
+  const injectUpdateNoteButton = (noteSelector, slugDB) => {
     if (currentVocabType !== 'vocabulary' && currentVocabType !== 'kanji') {
       return;
     }
@@ -490,11 +499,11 @@ MIT
     if (!noteElement) return;
 
     // Initialization
-    updateUpdateNoteButton(noteElement);
+    updateUpdateNoteButton(noteElement, slugDB);
 
     // Register a DOM change handler
     registerMutationObserver(noteElement, () => {
-      updateUpdateNoteButton(noteElement);
+      updateUpdateNoteButton(noteElement, slugDB);
     });
   };
 
@@ -502,5 +511,9 @@ MIT
 
   const noteSelectors = ['.note-meaning', '.note-reading'];
   noteSelectors.forEach(injectLinkSection);
-  noteSelectors.forEach(injectUpdateNoteButton);
+
+  const slugDB = await getSlugDBAsync();
+  noteSelectors.forEach(noteSelector =>
+    injectUpdateNoteButton(noteSelector, slugDB),
+  );
 })();
