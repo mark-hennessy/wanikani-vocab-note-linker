@@ -472,22 +472,34 @@ MIT
       },
     });
 
-    const initialButtonText = 'Update note';
-    button.innerHTML = initialButtonText;
-    button.onclick = async () => {
-      const existingNote = noteElement.innerHTML;
-      const generatedNote = generateNote(existingNote);
+    const ignoreNextUpdateAttribute = 'data-ignore-next-mutation';
+    const ignoreUpdate = noteElement.getAttribute(ignoreNextUpdateAttribute);
+    if (ignoreUpdate) {
+      noteElement.setAttribute(ignoreNextUpdateAttribute, false);
+      return;
+    }
 
-      if (existingNote !== generatedNote) {
+    const existingNote = noteElement.innerHTML;
+    const generatedNote = generateNote(existingNote);
+
+    if (existingNote !== generatedNote) {
+      // Reset the button
+      const initialButtonText = 'Update note';
+      button.innerHTML = initialButtonText;
+      button.style = '';
+      button.onclick = async () => {
+        noteElement.setAttribute(ignoreNextUpdateAttribute, true);
         noteElement.innerHTML = generatedNote;
-        navigator.clipboard.writeText(generatedNote);
 
         button.innerHTML =
           button.innerHTML === initialButtonText
             ? 'Manually open note to save'
             : initialButtonText;
-      }
-    };
+      };
+    } else {
+      // Hide the button
+      button.style = 'display: none;';
+    }
   };
 
   const injectUpdateNoteButton = (noteSelector, slugDB) => {
