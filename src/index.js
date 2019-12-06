@@ -2,7 +2,7 @@
 // @name         WaniKani Vocab Note Linker
 // @namespace    http://tampermonkey.net/
 // @description  Creates links for vocabulary in the Meaning Note and Reading Note sections.
-// @version      1.6.0
+// @version      1.6.1
 // @author       Mark Hennessy
 // @match        https://www.wanikani.com/vocabulary/*
 // @match        https://www.wanikani.com/kanji/*
@@ -499,7 +499,7 @@ MIT
 
         button.innerHTML =
           button.innerHTML === initialButtonText
-            ? 'Manually open note to save'
+            ? 'Manually open note and click save'
             : initialButtonText;
       };
     } else {
