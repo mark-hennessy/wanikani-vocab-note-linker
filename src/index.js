@@ -33,6 +33,8 @@ Constraints & Limitations
 * The script only works for vocabulary immediately followed by a Japanese opening parenthesis `（`
 * Chrome mobile does not allow add-ons and thus does not support Tampermonkey UserScripts
 * The `All` link will only work if you enable multiple popups/tabs in your browser settings
+* The `Update note` link requires the `WaniKani Open Framework` UserScript to be installed
+* Tampermonkey should be configured to load `WaniKani Open Framework` as the first UserScript, or at least before this one.
 
 How to use UserScripts in Firefox mobile
 ==
@@ -55,7 +57,8 @@ Enable multiple popups/tabs in Chrome
 Useful Links
 ==
 * [CodeSandbox Demo!](https://codesandbox.io/s/wanikani-vocab-note-linker-jzejl)
-* [GreasyFork](https://greasyfork.org/en/scripts/392752-wanikani-vocab-note-linker)
+* [GreasyFork - WaniKani Vocab Note Linker](https://greasyfork.org/en/scripts/392752-wanikani-vocab-note-linker)
+* [GreasyFork - WaniKani Open Framework](https://greasyfork.org/en/scripts/38582-wanikani-open-framework)
 * [GitHub](https://github.com/mark-hennessy/wanikani-vocab-note-linker)
 
 License
