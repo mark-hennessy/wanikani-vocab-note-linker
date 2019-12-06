@@ -14,7 +14,11 @@ WaniKani Vocab Note Linker
 ==
 Creates links for vocabulary in the **Meaning Note** and **Reading Note** sections.
 
+Also adds an update button to auto-update notes for you when updates are available.
+
 Take a look at the screenshots and try the [CodeSandbox Demo!](https://codesandbox.io/s/wanikani-vocab-note-linker-jzejl)
+
+I created this script as a productivity boost for myself and my own kanji learning process.
 
 Example Meaning Note
 ==
