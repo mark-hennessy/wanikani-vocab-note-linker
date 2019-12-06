@@ -432,6 +432,8 @@ MIT
 
     wkEntries.forEach(entry => {
       const vocabInfo = slugDB[entry.vocab];
+
+      // If no info is available, then assume the existing line is up-to-date.
       if (!vocabInfo) return;
 
       const { data } = vocabInfo;

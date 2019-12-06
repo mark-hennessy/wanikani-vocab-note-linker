@@ -1,6 +1,6 @@
 import './styles.css';
 
-const note = `
+const readableNote = `
 大変（たいへん）Serious, Terrible, Very, Difficult, Hard, Hectic
 <br>
 深刻（しんこく）Serious, Grave
@@ -30,6 +30,8 @@ const note = `
 <br>
 空オケ（からオケ、not in WK）Karaoke
 `;
+
+const note = readableNote.split('\n').join('');
 
 document.getElementById('app').innerHTML = `
 <header>
@@ -61,17 +63,10 @@ document.getElementById('app').innerHTML = `
 <section>
 <div>
   <h2>Meaning Note</h2>
-  <div class="note-meaning noSwipe">
-    ${note}
-  </div>
+  <div class="note-meaning noSwipe">${note}</div>
 </div>
-
 <div>
   <h2>Reading Note</h2>
-  <div class="note-reading noSwipe">
-    ${note}
-    <br>
-    <br>
-  </div>
+  <div class="note-reading noSwipe">${note}</div>
 </div>
 `;
