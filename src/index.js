@@ -472,10 +472,10 @@ MIT
       },
     });
 
-    const ignoreNextUpdateAttribute = 'data-ignore-next-mutation';
-    const ignoreUpdate = noteElement.getAttribute(ignoreNextUpdateAttribute);
-    if (ignoreUpdate) {
-      noteElement.setAttribute(ignoreNextUpdateAttribute, false);
+    const ignoreUpdateAttributeName = 'data-ignore-update';
+
+    if (noteElement.hasAttribute(ignoreUpdateAttributeName)) {
+      noteElement.removeAttribute(ignoreUpdateAttributeName);
       return;
     }
 
@@ -488,7 +488,7 @@ MIT
       button.innerHTML = initialButtonText;
       button.style = '';
       button.onclick = async () => {
-        noteElement.setAttribute(ignoreNextUpdateAttribute, true);
+        noteElement.setAttribute(ignoreUpdateAttributeName, '');
         noteElement.innerHTML = generatedNote;
 
         button.innerHTML =
