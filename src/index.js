@@ -18,7 +18,7 @@ Also adds an update button to auto-update notes for you when updates are availab
 
 Take a look at the screenshots and try the [CodeSandbox Demo!](https://codesandbox.io/s/wanikani-vocab-note-linker-jzejl)
 
-I created this script as a productivity boost for myself and my own kanji learning process.
+I created this script as a productivity boost for myself and my own kanji learning process, but I'd be delighted if others find it useful as well!
 
 Example Meaning Note
 ==
