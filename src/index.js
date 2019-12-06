@@ -97,6 +97,24 @@ MIT
     return element;
   };
 
+  const getNewButtonText = (button, initialText, endText) => {
+    const currentText = button.innerHTML;
+
+    if (!currentText) {
+      return initialText;
+    }
+
+    if (currentText === initialText) {
+      return endText;
+    }
+
+    if (currentText.startsWith(endText)) {
+      return currentText + '!';
+    }
+
+    return currentText;
+  };
+
   const getSlugDBAsync = async () => {
     /* eslint-disable no-undef */
     // wkof is a global variable added by another UserScript.
@@ -210,8 +228,7 @@ MIT
 
       navigator.clipboard.writeText(vocabLine);
 
-      button.innerHTML =
-        button.innerHTML === initialButtonText ? 'Copied' : initialButtonText;
+      button.innerHTML = getNewButtonText(button, initialButtonText, 'Copied');
     };
   };
 
@@ -500,10 +517,11 @@ MIT
         noteElement.setAttribute(ignoreUpdateAttributeName, '');
         noteElement.innerHTML = generatedNote;
 
-        button.innerHTML =
-          button.innerHTML === initialButtonText
-            ? 'Manually open note and click save'
-            : initialButtonText;
+        button.innerHTML = getNewButtonText(
+          button,
+          initialButtonText,
+          'Manually open note and click save',
+        );
       };
     } else {
       // Hide the button
