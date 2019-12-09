@@ -2,7 +2,7 @@
 // @name         WaniKani Vocab Note Linker
 // @namespace    http://tampermonkey.net/
 // @description  Creates links for vocabulary in the Meaning Note and Reading Note sections.
-// @version      1.6.2
+// @version      1.6.3
 // @author       Mark Hennessy
 // @match        https://www.wanikani.com/vocabulary/*
 // @match        https://www.wanikani.com/kanji/*
@@ -479,13 +479,17 @@ MIT
   };
 
   const updateUpdateNoteButton = (noteElement, slugDB) => {
-    // The note, i.e. rich text editor, will never be open when this function
-    // is called on initial script load, but it might be open when this function
-    // is called by the DOM mutation handler.
-    if (isNoteOpen(noteElement)) return;
-
     const parentElement = noteElement.parentElement;
     if (!parentElement) return;
+
+    const ignoreUpdateAttributeName = 'data-ignore-update';
+
+    // If the ignore-update attribute is present, then assume
+    // this is the update caused by opening the note to save or cancel.
+    if (noteElement.hasAttribute(ignoreUpdateAttributeName)) {
+      noteElement.removeAttribute(ignoreUpdateAttributeName);
+      return;
+    }
 
     const button = getOrCreateElement({
       tagName: 'button',
@@ -498,34 +502,37 @@ MIT
       },
     });
 
-    const ignoreUpdateAttributeName = 'data-ignore-update';
-
-    if (noteElement.hasAttribute(ignoreUpdateAttributeName)) {
-      noteElement.removeAttribute(ignoreUpdateAttributeName);
-      return;
-    }
-
-    const existingNote = noteElement.innerHTML;
-    const generatedNote = generateNote(existingNote);
-
-    if (existingNote !== generatedNote) {
-      // Reset the button
-      const initialButtonText = 'Update note';
-      button.innerHTML = initialButtonText;
-      button.style = '';
-      button.onclick = async () => {
-        noteElement.setAttribute(ignoreUpdateAttributeName, '');
-        noteElement.innerHTML = generatedNote;
-
-        button.innerHTML = getNewButtonText(
-          button,
-          initialButtonText,
-          'Manually open note and click save',
-        );
-      };
-    } else {
+    const hideButton = () => {
       // Hide the button
       button.style = 'display: none;';
+    };
+
+    if (!isNoteOpen(noteElement)) {
+      const existingNote = noteElement.innerHTML;
+      const generatedNote = generateNote(existingNote);
+
+      if (existingNote !== generatedNote) {
+        // Reset the button
+        const initialButtonText = 'Update note';
+        button.innerHTML = initialButtonText;
+        button.style = '';
+        button.onclick = async () => {
+          noteElement.setAttribute(ignoreUpdateAttributeName, '');
+          noteElement.innerHTML = generatedNote;
+
+          button.innerHTML = getNewButtonText(
+            button,
+            initialButtonText,
+            'Manually open note and click save',
+          );
+        };
+      } else {
+        // Hide the button because there is nothing to update
+        hideButton();
+      }
+    } else {
+      // Hide the button because the note is open
+      hideButton();
     }
   };
 
