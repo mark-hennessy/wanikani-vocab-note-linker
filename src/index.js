@@ -350,11 +350,18 @@ MIT
     // Ignore the 'All' entry
     const entriesWithVocab = group.filter(entry => entry.vocab);
 
-    const hasLinks = entriesWithVocab.some(entry => entry.link);
-
-    const groupText = entriesWithVocab.map(createVocabLine).join('\\n');
+    const groupText = entriesWithVocab
+      .map(createVocabLine)
+      .join('\\n')
+      // The onclick function is defined as one big string surrounded by double quotes,
+      // and clipboard.writeText (inside of onclick) surrounds text with single quotes,
+      // so both single quotes and double quotes inside of the text need to be escaped!
+      .replace("'", "\\'")
+      .replace('"', '\\"');
 
     const onclick = `navigator.clipboard.writeText('${groupText}');return false;`;
+
+    const hasLinks = entriesWithVocab.some(entry => entry.link);
 
     const copyLink = `<a href="#" style="${linkStyle}" onclick="${onclick}">${
       hasLinks ? 'Copy' : 'Copy (not on WK)'
