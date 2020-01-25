@@ -2,7 +2,7 @@
 // @name         WaniKani Vocab Note Linker
 // @namespace    http://tampermonkey.net/
 // @description  Creates links for vocabulary in the Meaning Note and Reading Note sections.
-// @version      1.6.4
+// @version      1.6.5
 // @author       Mark Hennessy
 // @match        https://www.wanikani.com/vocabulary/*
 // @match        https://www.wanikani.com/kanji/*
@@ -364,8 +364,8 @@ MIT
       // The onclick function is defined as one big string surrounded by double quotes,
       // and clipboard.writeText (inside of onclick) surrounds text with single quotes,
       // so both single quotes and double quotes inside of the text need to be escaped!
-      .replace("'", "\\'")
-      .replace('"', '\\"');
+      .replace(/'/g, "\\'")
+      .replace(/"/g, '\\"');
 
     const onclick = `navigator.clipboard.writeText('${groupText}');return false;`;
 
