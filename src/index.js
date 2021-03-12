@@ -556,7 +556,7 @@ MIT
     });
   };
 
-  injectCopyButton('header');
+  injectCopyButton('.row header');
 
   const noteSelectors = ['.note-meaning', '.note-reading'];
   noteSelectors.forEach(injectLinkSection);
