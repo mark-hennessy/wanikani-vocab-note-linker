@@ -44,6 +44,7 @@ document.getElementById('app').innerHTML = `
   </h1>
 </header>
 <section id="meaning">
+  <h2>Meaning</h2>
   <div class="alternative-meaning">
     <strong>Primary</strong>
     <p>Serious</p>
@@ -55,7 +56,7 @@ document.getElementById('app').innerHTML = `
   <section id="note-meaning">
     <strong>Note</strong>
     <br /><br />
-    <div>${note}</div>
+    <div class="note-meaning">${note}</div>
   </section>
 </section>
 <section id="reading">
@@ -69,7 +70,7 @@ document.getElementById('app').innerHTML = `
   <section id="note-reading">
     <strong>Note</strong>
     <br /><br />
-    <div>${note}</div>
+    <div class="note-reading">${note}</div>
   </section>
 <section>
 `;
