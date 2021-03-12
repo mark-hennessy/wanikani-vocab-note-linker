@@ -165,7 +165,6 @@ MIT
     const alternativeMeaningsElement = document.querySelector(
       '#meaning .alternative-meaning:nth-child(3) p',
     );
-    console.log(alternativeMeaningsElement);
 
     if (alternativeMeaningsElement) {
       const alternativeMeanings = alternativeMeaningsElement.textContent.trim();
@@ -187,8 +186,6 @@ MIT
       .map((el) => el.innerHTML.trim())
       .filter((v) => v !== 'None')
       .join('、');
-
-    console.log(currentVocab);
 
     return {
       vocab: currentVocab,
