@@ -155,19 +155,21 @@ MIT
     : 'vocabulary';
 
   const screenScrapeCurrentVocabEntry = () => {
-    const headerElement = document.querySelector('header > h1');
-    const primaryMeaning = headerElement.lastChild.textContent.trim();
+    const primaryMeaningElement = document.querySelector(
+      '#meaning .alternative-meaning:nth-child(2) p',
+    );
+
+    const primaryMeaning = primaryMeaningElement.textContent.trim();
     let meanings = primaryMeaning;
 
     const alternativeMeaningsElement = document.querySelector(
-      '.alternative-meaning:not(.user-synonyms):not(.part-of-speech)',
+      '#meaning .alternative-meaning:nth-child(3) p',
     );
+    console.log(alternativeMeaningsElement);
 
     if (alternativeMeaningsElement) {
-      const alternativeMeanings =
-        alternativeMeaningsElement.children[1].innerHTML;
-
-      meanings += `, ${alternativeMeanings}`;
+      const alternativeMeanings = alternativeMeaningsElement.textContent.trim();
+      meanings = [primaryMeaning, alternativeMeanings].join(', ');
     }
 
     let readingNodeList;
