@@ -38,21 +38,27 @@ document.getElementById('app').innerHTML = `
   <div class="logo">
     <h1>WaniKani</h1>
   </div>
-</header>
-<header>
   <h1>
     <a class="level-icon" href="#" onclick="return false;">54</a>
     <span>大変</span>
-    Serious
   </h1>
 </header>
-<section id="information">
+<section id="meaning">
   <div class="alternative-meaning">
-    <h2>Alternative Meanings</h2>
+    <strong>Primary</strong>
+    <p>Serious</p>
+  </div>
+  <div class="alternative-meaning">
+    <strong>Alternative Meanings</strong>
     <p>Terrible, Very, Difficult, Hard, Hectic</p>
   </div>
+  <section id="note-meaning">
+    <strong>Note</strong>
+    <br /><br />
+    <div>${note}</div>
+  </section>
 </section>
-<section class="vocabulary-reading">
+<section id="reading">
   <h2>Reading</h2>
   <div class="pronunciation-group">
     <p class="pronunciation-variant">たいへん</p>
@@ -60,13 +66,10 @@ document.getElementById('app').innerHTML = `
   <div class="pronunciation-group">
     <p class="pronunciation-variant">タイヘン</p>
   </div>
+  <section id="note-reading">
+    <strong>Note</strong>
+    <br /><br />
+    <div>${note}</div>
+  </section>
 <section>
-<div>
-  <h2>Meaning Note</h2>
-  <div class="note-meaning noSwipe">${note}</div>
-</div>
-<div>
-  <h2>Reading Note</h2>
-  <div class="note-reading noSwipe">${note}</div>
-</div>
 `;
