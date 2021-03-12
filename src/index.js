@@ -188,6 +188,8 @@ MIT
       .filter((v) => v !== 'None')
       .join('、');
 
+    console.log(currentVocab);
+
     return {
       vocab: currentVocab,
       meta,
