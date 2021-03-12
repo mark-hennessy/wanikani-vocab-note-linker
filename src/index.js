@@ -2,7 +2,7 @@
 // @name         WaniKani Vocab Note Linker
 // @namespace    http://tampermonkey.net/
 // @description  Creates links for vocabulary in the Meaning Note and Reading Note sections.
-// @version      1.6.5
+// @version      1.6.6
 // @author       Mark Hennessy
 // @match        https://www.wanikani.com/vocabulary/*
 // @match        https://www.wanikani.com/kanji/*
@@ -35,18 +35,6 @@ Constraints & Limitations
 * The `All` link will only work if you enable multiple popups/tabs in your browser settings
 * The `Update note` link requires the WaniKani Open Framework UserScript to be installed
 * Tampermonkey should be configured to load WaniKani Open Framework as the first UserScript, or at least before this one
-
-How to use UserScripts in Firefox mobile
-==
-1. Install Firefox on your phone
-2. Open Firefox and install [Tampermonkey](https://addons.mozilla.org/en-US/android/addon/tampermonkey/)
-3. Find and install scripts from [GreasyFork](https://greasyfork.org/en/scripts?utf8=%E2%9C%93&q=wanikani)
-
-Enable multiple popups/tabs in Firefox on Android (probably iOS as well)
-==
-1. Type `about:config` in the URL bar
-2. Search for `popups`
-3. Click `dom.block_multiple_popups` to change the value to `false`
 
 Enable multiple popups/tabs in Chrome
 ==
@@ -88,7 +76,7 @@ MIT
 
     if (!element) {
       element = document.createElement(tagName);
-      const cn = [className, secondaryClassNames].filter(v => v).join(' ');
+      const cn = [className, secondaryClassNames].filter((v) => v).join(' ');
       if (cn) {
         element.className = cn;
       }
@@ -167,19 +155,20 @@ MIT
     : 'vocabulary';
 
   const screenScrapeCurrentVocabEntry = () => {
-    const headerElement = document.querySelector('header > h1');
-    const primaryMeaning = headerElement.lastChild.textContent.trim();
+    const primaryMeaningElement = document.querySelector(
+      '#meaning .alternative-meaning:nth-child(2) p',
+    );
+
+    const primaryMeaning = primaryMeaningElement.textContent.trim();
     let meanings = primaryMeaning;
 
     const alternativeMeaningsElement = document.querySelector(
-      '.alternative-meaning:not(.user-synonyms):not(.part-of-speech)',
+      '#meaning .alternative-meaning:nth-child(3) p',
     );
 
     if (alternativeMeaningsElement) {
-      const alternativeMeanings =
-        alternativeMeaningsElement.children[1].innerHTML;
-
-      meanings += `, ${alternativeMeanings}`;
+      const alternativeMeanings = alternativeMeaningsElement.textContent.trim();
+      meanings = [primaryMeaning, alternativeMeanings].join(', ');
     }
 
     let readingNodeList;
@@ -194,8 +183,8 @@ MIT
     }
 
     const meta = Array.from(readingNodeList)
-      .map(el => el.innerHTML.trim())
-      .filter(v => v !== 'None')
+      .map((el) => el.innerHTML.trim())
+      .filter((v) => v !== 'None')
       .join('、');
 
     return {
@@ -205,11 +194,11 @@ MIT
     };
   };
 
-  const createVocabLine = vocabEntry => {
+  const createVocabLine = (vocabEntry) => {
     return `${vocabEntry.vocab}（${vocabEntry.meta}）${vocabEntry.meanings}`;
   };
 
-  const injectCopyButton = parentSelector => {
+  const injectCopyButton = (parentSelector) => {
     if (currentVocabType !== 'vocabulary' && currentVocabType !== 'kanji') {
       return;
     }
@@ -240,7 +229,7 @@ MIT
     };
   };
 
-  const createUrl = vocab => {
+  const createUrl = (vocab) => {
     return `https://www.wanikani.com/${currentVocabType}/${vocab}`;
   };
 
@@ -285,15 +274,15 @@ MIT
     };
   };
 
-  const splitNoteIntoLines = note => {
-    return note.split('<br>').map(line => line.trim());
+  const splitNoteIntoLines = (note) => {
+    return note.split('<br>').map((line) => line.trim());
   };
 
-  const createNoteFromLines = lines => {
+  const createNoteFromLines = (lines) => {
     return lines.join('<br>');
   };
 
-  const parseGroups = note => {
+  const parseGroups = (note) => {
     const groups = [[]];
 
     const lines = splitNoteIntoLines(note);
@@ -317,24 +306,24 @@ MIT
 
     // There may be empty groups, that need to be filtered out,
     // if the note ended in blank lines or remarks.
-    const groupsWithEntries = groups.filter(group => group.length);
+    const groupsWithEntries = groups.filter((group) => group.length);
 
     return groupsWithEntries;
   };
 
-  const createAllEntry = group => {
+  const createAllEntry = (group) => {
     const urls = group
-      .filter(entry => entry.vocab !== currentVocab)
+      .filter((entry) => entry.vocab !== currentVocab)
       // Ignore 'All' and 'not on/in WK' entries
-      .filter(entry => entry.url)
-      .map(entry => entry.url);
+      .filter((entry) => entry.url)
+      .map((entry) => entry.url);
 
     const uniqueURLs = [...new Set(urls)];
 
     const onclick =
       uniqueURLs
         // _blank is needed for Firefox
-        .map(url => `window.open('${url}', '_blank');`)
+        .map((url) => `window.open('${url}', '_blank');`)
         .join('') + 'return false;';
 
     const allLink = `<a href="#" style="${linkStyle}" onclick="${onclick}">All</a>`;
@@ -344,9 +333,9 @@ MIT
     };
   };
 
-  const addAllLinks = groups => {
-    return groups.map(group => {
-      const entriesWithUrls = group.filter(entry => entry.url);
+  const addAllLinks = (groups) => {
+    return groups.map((group) => {
+      const entriesWithUrls = group.filter((entry) => entry.url);
 
       return entriesWithUrls.length > 1
         ? [...group, createAllEntry(group)]
@@ -354,9 +343,9 @@ MIT
     });
   };
 
-  const createCopyEntry = group => {
+  const createCopyEntry = (group) => {
     // Ignore the 'All' entry
-    const entriesWithVocab = group.filter(entry => entry.vocab);
+    const entriesWithVocab = group.filter((entry) => entry.vocab);
 
     const groupText = entriesWithVocab
       .map(createVocabLine)
@@ -369,7 +358,7 @@ MIT
 
     const onclick = `navigator.clipboard.writeText('${groupText}');return false;`;
 
-    const hasLinks = entriesWithVocab.some(entry => entry.link);
+    const hasLinks = entriesWithVocab.some((entry) => entry.link);
 
     const copyLink = `<a href="#" style="${linkStyle}" onclick="${onclick}">${
       hasLinks ? 'Copy' : 'Copy (not on WK)'
@@ -380,9 +369,9 @@ MIT
     };
   };
 
-  const addCopyLinks = groups => {
-    return groups.map(group => {
-      const entriesWithVocab = group.filter(entry => entry.vocab);
+  const addCopyLinks = (groups) => {
+    return groups.map((group) => {
+      const entriesWithVocab = group.filter((entry) => entry.vocab);
 
       // Don't add the 'Copy' entry to the group at the bottom with a single 'All' entry.
       return entriesWithVocab.length > 0
@@ -391,13 +380,13 @@ MIT
     });
   };
 
-  const createEverythingEntry = groups => {
-    return createAllEntry(groups.flatMap(group => group));
+  const createEverythingEntry = (groups) => {
+    return createAllEntry(groups.flatMap((group) => group));
   };
 
-  const addEverythingLink = groups => {
+  const addEverythingLink = (groups) => {
     const groupsWithAtLeastOneUrl = groups.filter(
-      group => group.filter(entry => entry.url).length,
+      (group) => group.filter((entry) => entry.url).length,
     );
 
     return groupsWithAtLeastOneUrl.length > 1
@@ -405,20 +394,20 @@ MIT
       : groups;
   };
 
-  const generateLinkSectionContent = groups => {
+  const generateLinkSectionContent = (groups) => {
     return groups
-      .filter(group => group.some(entry => entry.link))
-      .map(group => group.map(entry => entry.link))
-      .map(group => group.join(''))
+      .filter((group) => group.some((entry) => entry.link))
+      .map((group) => group.map((entry) => entry.link))
+      .map((group) => group.join(''))
       .join('<br>');
   };
 
-  const isNoteOpen = noteElement => {
+  const isNoteOpen = (noteElement) => {
     const noteFirstChild = noteElement.firstChild;
     return noteFirstChild && noteFirstChild.nodeName === 'FORM';
   };
 
-  const updateLinkSection = noteElement => {
+  const updateLinkSection = (noteElement) => {
     // The note, i.e. rich text editor, will never be open when this function
     // is called on initial script load, but it might be open when this function
     // is called by the DOM mutation handler.
@@ -444,7 +433,7 @@ MIT
     linkSectionElement.innerHTML = linkSectionContent;
   };
 
-  const injectLinkSection = noteSelector => {
+  const injectLinkSection = (noteSelector) => {
     if (currentVocabType !== 'vocabulary' && currentVocabType !== 'kanji') {
       return;
     }
@@ -461,23 +450,23 @@ MIT
     });
   };
 
-  const generateNote = existingNote => {
+  const generateNote = (existingNote) => {
     const lines = splitNoteIntoLines(existingNote);
     const groups = parseGroups(existingNote);
 
     const wkEntries = groups
-      .flatMap(group => group)
-      .filter(entry => entry.isOnWaniKani);
+      .flatMap((group) => group)
+      .filter((entry) => entry.isOnWaniKani);
 
-    wkEntries.forEach(entry => {
+    wkEntries.forEach((entry) => {
       const vocabInfo = slugDB[entry.vocab];
 
       // If no info is available, then assume the existing line is up-to-date.
       if (!vocabInfo) return;
 
       const { data } = vocabInfo;
-      const generatedMeta = data.readings.map(v => v.reading).join('、');
-      const generatedMeanings = data.meanings.map(v => v.meaning).join(', ');
+      const generatedMeta = data.readings.map((v) => v.reading).join('、');
+      const generatedMeanings = data.meanings.map((v) => v.meaning).join(', ');
 
       const generatedLine = createVocabLine({
         vocab: entry.vocab,
@@ -568,13 +557,13 @@ MIT
     });
   };
 
-  injectCopyButton('#information');
+  injectCopyButton('.row header');
 
   const noteSelectors = ['.note-meaning', '.note-reading'];
   noteSelectors.forEach(injectLinkSection);
 
   const slugDB = await getSlugDBAsync();
-  noteSelectors.forEach(noteSelector =>
+  noteSelectors.forEach((noteSelector) =>
     injectUpdateNoteButton(noteSelector, slugDB),
   );
 })();
