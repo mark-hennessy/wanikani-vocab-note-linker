@@ -2,7 +2,7 @@
 // @name         WaniKani Vocab Note Linker
 // @namespace    http://tampermonkey.net/
 // @description  Creates links for vocabulary in the Meaning Note and Reading Note sections.
-// @version      1.6.6
+// @version      1.6.7
 // @author       Mark Hennessy
 // @match        https://www.wanikani.com/vocabulary/*
 // @match        https://www.wanikani.com/kanji/*
@@ -178,12 +178,12 @@ MIT
       );
     } else if (currentVocabType === 'kanji') {
       readingNodeList = document.querySelectorAll(
-        '#components + section p[lang="ja"]',
+        '#reading .span4 p[lang="ja"]',
       );
     }
 
     const meta = Array.from(readingNodeList)
-      .map((el) => el.innerHTML.trim())
+      .map((el) => el.textContent.trim())
       .filter((v) => v !== 'None')
       .join('、');
 
