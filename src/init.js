@@ -56,6 +56,10 @@ document.getElementById('app').innerHTML = `
       <strong>Alternative Meanings</strong>
       <p>Terrible, Very, Difficult, Hard, Hectic</p>
     </div>
+    <div class="alternative-meaning">
+      <strong>Word Type</strong>
+      <p>noun, する verb</p>
+    </div>
     <section id="note-meaning">
       <strong>Note</strong>
       <br /><br />

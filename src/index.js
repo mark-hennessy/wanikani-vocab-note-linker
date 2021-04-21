@@ -2,7 +2,7 @@
 // @name         WaniKani Vocab Note Linker
 // @namespace    http://tampermonkey.net/
 // @description  Creates links for vocabulary in the Meaning Note and Reading Note sections.
-// @version      1.6.8
+// @version      1.6.9
 // @author       Mark Hennessy
 // @match        https://www.wanikani.com/vocabulary/*
 // @match        https://www.wanikani.com/kanji/*
@@ -160,6 +160,7 @@ MIT
     );
 
     const meanings = Array.from(meaningNodeList)
+      .slice(0, 2)
       .map((el) => el.textContent.trim())
       .filter((v) => v !== 'None')
       .join(', ');
