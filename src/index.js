@@ -201,7 +201,9 @@ MIT
     }
 
     const parentElement = document.querySelector(parentSelector);
-    if (!parentElement) return;
+    if (!parentElement) {
+      return;
+    }
 
     const button = getOrCreateElement({
       tagName: 'button',
@@ -244,7 +246,9 @@ MIT
   const parseVocabEntry = (line, lineIndex) => {
     // Match text before a Japanese opening parenthesis and assume it's kanji
     const vocabMatchResult = line.match(/^(.*)（/);
-    if (!vocabMatchResult) return null;
+    if (!vocabMatchResult) {
+      return null;
+    }
 
     const vocab = vocabMatchResult[1];
 
@@ -408,10 +412,14 @@ MIT
     // The note, i.e. rich text editor, will never be open when this function
     // is called on initial script load, but it might be open when this function
     // is called by the DOM mutation handler.
-    if (isNoteOpen(noteElement)) return;
+    if (isNoteOpen(noteElement)) {
+      return;
+    }
 
     const parentElement = noteElement.parentElement;
-    if (!parentElement) return;
+    if (!parentElement) {
+      return;
+    }
 
     const note = noteElement.innerHTML;
 
@@ -436,7 +444,9 @@ MIT
     }
 
     const noteElement = document.querySelector(noteSelector);
-    if (!noteElement) return;
+    if (!noteElement) {
+      return;
+    }
 
     // Initialization
     updateLinkSection(noteElement);
@@ -459,7 +469,9 @@ MIT
       const vocabInfo = slugDB[entry.vocab];
 
       // If no info is available, then assume the existing line is up-to-date.
-      if (!vocabInfo) return;
+      if (!vocabInfo) {
+        return;
+      }
 
       const { data } = vocabInfo;
       const generatedMetadata = data.readings.map((v) => v.reading).join('、');
@@ -481,7 +493,9 @@ MIT
 
   const updateUpdateNoteButton = (noteElement) => {
     const parentElement = noteElement.parentElement;
-    if (!parentElement) return;
+    if (!parentElement) {
+      return;
+    }
 
     const ignoreUpdateAttributeName = 'data-ignore-update';
 
@@ -543,7 +557,9 @@ MIT
     }
 
     const noteElement = document.querySelector(noteSelector);
-    if (!noteElement) return;
+    if (!noteElement) {
+      return;
+    }
 
     // Initialization
     updateUpdateNoteButton(noteElement, slugDB);
