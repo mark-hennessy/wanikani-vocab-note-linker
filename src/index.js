@@ -179,20 +179,20 @@ MIT
       );
     }
 
-    const meta = Array.from(readingNodeList)
+    const metadata = Array.from(readingNodeList)
       .map((el) => el.textContent.trim())
       .filter((v) => v !== 'None')
       .join('、');
 
     return {
       vocab: currentVocab,
-      meta,
+      metadata,
       meanings,
     };
   };
 
   const createVocabLine = (vocabEntry) => {
-    return `${vocabEntry.vocab}（${vocabEntry.meta}）${vocabEntry.meanings}`;
+    return `${vocabEntry.vocab}（${vocabEntry.metadata}）${vocabEntry.meanings}`;
   };
 
   const injectCopyButton = (parentSelector) => {
@@ -249,24 +249,24 @@ MIT
     const vocab = vocabMatchResult[1];
 
     // Math text between Japanese opening and closing parentheses and assume it's metadata
-    const metaMatchResult = line.match(/^.*（(.*)）/);
-    const meta = metaMatchResult ? metaMatchResult[1] : null;
+    const metadataMatchResult = line.match(/^.*（(.*)）/);
+    const metadata = metadataMatchResult ? metadataMatchResult[1] : null;
 
     // Match text after Japanese opening and closing parentheses and assume it's a list of English meanings
     const meaningsMatchResult = line.match(/^.*（.*）(.*)/);
     const meanings = meaningsMatchResult ? meaningsMatchResult[1] : null;
 
-    const isOnWaniKani = !/(not on WK|not in WK)/.test(meta);
-    const url = isOnWaniKani ? createUrl(vocab) : null;
-    const link = isOnWaniKani ? createLink(url, vocab) : null;
+    const notOnWk = /not on WK/.test(metadata);
+    const url = !notOnWk ? createUrl(vocab) : null;
+    const link = !notOnWk ? createLink(url, vocab) : null;
 
     return {
       vocab,
-      meta,
+      metadata,
       meanings,
       url,
       link,
-      isOnWaniKani,
+      notOnWk,
       lineIndex,
     };
   };
@@ -453,7 +453,7 @@ MIT
 
     const wkEntries = groups
       .flatMap((group) => group)
-      .filter((entry) => entry.isOnWaniKani);
+      .filter((entry) => !entry.notOnWk);
 
     wkEntries.forEach((entry) => {
       const vocabInfo = slugDB[entry.vocab];
@@ -462,12 +462,12 @@ MIT
       if (!vocabInfo) return;
 
       const { data } = vocabInfo;
-      const generatedMeta = data.readings.map((v) => v.reading).join('、');
+      const generatedMetadata = data.readings.map((v) => v.reading).join('、');
       const generatedMeanings = data.meanings.map((v) => v.meaning).join(', ');
 
       const generatedLine = createVocabLine({
         vocab: entry.vocab,
-        meta: entry.meta || generatedMeta,
+        metadata: entry.metadata || generatedMetadata,
         meanings: generatedMeanings,
       });
 
@@ -479,7 +479,7 @@ MIT
     return generatedNote;
   };
 
-  const updateUpdateNoteButton = (noteElement, slugDB) => {
+  const updateUpdateNoteButton = (noteElement) => {
     const parentElement = noteElement.parentElement;
     if (!parentElement) return;
 
