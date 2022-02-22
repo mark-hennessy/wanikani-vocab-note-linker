@@ -1,0 +1,5 @@
+# vscode plugins
+.history/
+
+# misc.
+.DS_Store
