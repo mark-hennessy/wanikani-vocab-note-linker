@@ -1,3 +1,11 @@
+
+.parcel-cache
+dist/
+
+# Package manager
+node_modules/
+.pnpm-debug.log
+
 # vscode plugins
 .history/
 

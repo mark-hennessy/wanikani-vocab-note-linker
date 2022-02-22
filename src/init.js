@@ -28,7 +28,11 @@ const readableNote = `
 <br>
 空手（からて、not on WK）Karate (a type of Martial Arts)
 <br>
-空オケ（からオケ、not in WK）Karaoke
+空オケ（からオケ、not on WK）Karaoke
+<br>
+十（とお、override）Ten Things
+<br>
+〜十（とお、not on WK、override）Ten Things
 `;
 
 const note = readableNote.split('\n').join('');

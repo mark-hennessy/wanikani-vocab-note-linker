@@ -16,14 +16,14 @@ Creates links for vocabulary referenced in the **Meaning Note** and **Reading No
 sections.
 
 Also adds an update button to auto-update notes when updates are available. The
-updates are not saved until you open the note and click the "Save" button.
-Clicking "Cancel" or refreshing the page will undo the changes.
+updates are not saved until you open the note and click the `Save` button.
+Clicking `Cancel` or refreshing the page will undo the changes.
 
 I created this script as a productivity tool for myself and my own kanji learning process.
 
 Example Meaning Note
 ==
-木材（もくざい）Wood, Lumber
+木材（もくざい）Wood, Lumber<br>
 材木（ざいもく）Lumber, Timber, Wood
 
 Some text
@@ -261,6 +261,7 @@ MIT
     const meanings = meaningsMatchResult ? meaningsMatchResult[1] : null;
 
     const notOnWk = /not on WK/.test(metadata);
+    const override = /override/.test(metadata);
     const url = !notOnWk ? createUrl(vocab) : null;
     const link = !notOnWk ? createLink(url, vocab) : null;
 
@@ -271,6 +272,7 @@ MIT
       url,
       link,
       notOnWk,
+      override,
       lineIndex,
     };
   };
@@ -463,7 +465,7 @@ MIT
 
     const wkEntries = groups
       .flatMap((group) => group)
-      .filter((entry) => !entry.notOnWk);
+      .filter((entry) => !entry.notOnWk && !entry.override);
 
     wkEntries.forEach((entry) => {
       const vocabInfo = slugDB[entry.vocab];
