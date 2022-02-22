@@ -208,7 +208,7 @@ MIT
     const button = getOrCreateElement({
       tagName: 'button',
       className: 'copy-button',
-      // Just use the global WaniKani button styles
+      // just use the global WaniKani button styles
       secondaryClassNames: 'btn btn-mini',
       parentElement,
       attributes: {
@@ -244,7 +244,7 @@ MIT
   };
 
   const parseVocabEntry = (line, lineIndex) => {
-    // Match text before a Japanese opening parenthesis and assume it's kanji
+    // match text before a Japanese opening parenthesis and assume it's kanji
     const vocabMatchResult = line.match(/^(.*)（/);
     if (!vocabMatchResult) {
       return null;
@@ -252,11 +252,11 @@ MIT
 
     const vocab = vocabMatchResult[1];
 
-    // Math text between Japanese opening and closing parentheses and assume it's metadata
+    // math text between Japanese opening and closing parentheses and assume it's metadata
     const metadataMatchResult = line.match(/^.*（(.*)）/);
     const metadata = metadataMatchResult ? metadataMatchResult[1] : null;
 
-    // Match text after Japanese opening and closing parentheses and assume it's a list of English meanings
+    // match text after Japanese opening and closing parentheses and assume it's a list of English meanings
     const meaningsMatchResult = line.match(/^.*（.*）(.*)/);
     const meanings = meaningsMatchResult ? meaningsMatchResult[1] : null;
 
@@ -294,19 +294,19 @@ MIT
 
       if (!vocabEntry) {
         if (currentGroup.length) {
-          // Start a new group
+          // start a new group
           groups.push([]);
         }
 
-        // Continue to the next line
+        // continue to the next line
         return;
       }
 
       currentGroup.push(vocabEntry);
     });
 
-    // There may be empty groups, that need to be filtered out,
-    // if the note ended in blank lines or remarks.
+    // there may be empty groups, that need to be filtered out,
+    // if the note ended in blank lines or remarks
     const groupsWithEntries = groups.filter((group) => group.length);
 
     return groupsWithEntries;
@@ -315,7 +315,7 @@ MIT
   const createAllEntry = (group) => {
     const urls = group
       .filter((entry) => entry.vocab !== currentVocab)
-      // Ignore 'All' and 'not on/in WK' entries
+      // ignore 'All' and 'not on/in WK' entries
       .filter((entry) => entry.url)
       .map((entry) => entry.url);
 
@@ -345,7 +345,7 @@ MIT
   };
 
   const createCopyEntry = (group) => {
-    // Ignore the 'All' entry
+    // ignore the 'All' entry
     const entriesWithVocab = group.filter((entry) => entry.vocab);
 
     const groupText = entriesWithVocab
@@ -374,7 +374,7 @@ MIT
     return groups.map((group) => {
       const entriesWithVocab = group.filter((entry) => entry.vocab);
 
-      // Don't add the 'Copy' entry to the group at the bottom with a single 'All' entry.
+      // don't add the 'Copy' entry to the group at the bottom with a single 'All' entry
       return entriesWithVocab.length > 0
         ? [...group, createCopyEntry(group)]
         : group;
@@ -448,10 +448,10 @@ MIT
       return;
     }
 
-    // Initialization
+    // initialization
     updateLinkSection(noteElement);
 
-    // Register a DOM change handler
+    // register a DOM change handler
     registerMutationObserver(noteElement, () => {
       updateLinkSection(noteElement);
     });
@@ -468,7 +468,7 @@ MIT
     wkEntries.forEach((entry) => {
       const vocabInfo = slugDB[entry.vocab];
 
-      // If no info is available, then assume the existing line is up-to-date.
+      // if no info is available, then assume the existing line is up-to-date
       if (!vocabInfo) {
         return;
       }
@@ -499,8 +499,8 @@ MIT
 
     const ignoreUpdateAttributeName = 'data-ignore-update';
 
-    // If the ignore-update attribute is present, then assume
-    // this is the update caused by opening the note to save or cancel.
+    // if the ignore-update attribute is present, then assume
+    // this is the update caused by opening the note to save or cancel
     if (noteElement.hasAttribute(ignoreUpdateAttributeName)) {
       noteElement.removeAttribute(ignoreUpdateAttributeName);
       return;
@@ -509,7 +509,7 @@ MIT
     const button = getOrCreateElement({
       tagName: 'button',
       className: 'update-note-button',
-      // Just use the global WaniKani button styles
+      // just use the global WaniKani button styles
       secondaryClassNames: 'btn btn-mini',
       parentElement,
       attributes: {
@@ -518,7 +518,7 @@ MIT
     });
 
     const hideButton = () => {
-      // Hide the button
+      // hide the button
       button.style = 'display: none;';
     };
 
@@ -527,7 +527,7 @@ MIT
       const generatedNote = generateNote(existingNote);
 
       if (existingNote !== generatedNote) {
-        // Reset the button
+        // reset the button
         const initialButtonText = 'Update note';
         button.innerHTML = initialButtonText;
         button.style = '';
@@ -542,11 +542,11 @@ MIT
           );
         };
       } else {
-        // Hide the button because there is nothing to update
+        // hide the button because there is nothing to update
         hideButton();
       }
     } else {
-      // Hide the button because the note is open
+      // hide the button because the note is open
       hideButton();
     }
   };
@@ -561,10 +561,10 @@ MIT
       return;
     }
 
-    // Initialization
+    // initialization
     updateUpdateNoteButton(noteElement, slugDB);
 
-    // Register a DOM change handler
+    // register a DOM change handler
     registerMutationObserver(noteElement, () => {
       updateUpdateNoteButton(noteElement, slugDB);
     });
