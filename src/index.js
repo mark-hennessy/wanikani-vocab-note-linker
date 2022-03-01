@@ -2,7 +2,7 @@
 // @name         WaniKani Vocab Note Linker
 // @namespace    http://tampermonkey.net/
 // @description  Creates links for vocabulary in the Meaning Note and Reading Note sections.
-// @version      1.8.0
+// @version      1.8.1
 // @author       Mark Hennessy
 // @match        https://www.wanikani.com/vocabulary/*
 // @match        https://www.wanikani.com/kanji/*
@@ -75,7 +75,7 @@ MIT
 
     if (!element) {
       element = document.createElement(tagName);
-      const cn = [className, secondaryClassNames].filter((v) => v).join(' ');
+      const cn = [className, secondaryClassNames].filter(Boolean).join(' ');
       if (cn) {
         element.className = cn;
       }
@@ -163,7 +163,7 @@ MIT
     );
 
     const meanings = [primaryMeanings, secondaryMeanings]
-      .filter((el) => !!el)
+      .filter(Boolean)
       .map((el) => el.textContent.trim())
       .filter((v) => v !== 'None')
       .join(', ');
