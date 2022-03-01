@@ -475,13 +475,17 @@ MIT
         return;
       }
 
-      const { data } = vocabInfo;
-      const generatedMetadata = data.readings.map((v) => v.reading).join('、');
-      const generatedMeanings = data.meanings.map((v) => v.meaning).join(', ');
+      const { meanings } = vocabInfo.data;
+      const generatedMeanings = [
+        ...meanings.filter((m) => m.primary),
+        ...meanings.filter((m) => !m.primary),
+      ]
+        .map((m) => m.meaning)
+        .join(', ');
 
       const generatedLine = createVocabLine({
         vocab: entry.vocab,
-        metadata: entry.metadata || generatedMetadata,
+        metadata: entry.metadata,
         meanings: generatedMeanings,
       });
 
