@@ -2,7 +2,7 @@
 // @name         WaniKani Vocab Note Linker
 // @namespace    http://tampermonkey.net/
 // @description  Creates links for vocabulary in the Meaning Note and Reading Note sections.
-// @version      1.8.2
+// @version      1.8.3
 // @author       Mark Hennessy
 // @match        https://www.wanikani.com/vocabulary/*
 // @match        https://www.wanikani.com/kanji/*
@@ -53,20 +53,20 @@ License
 MIT
 */
 
-(async () => {
+(async function () {
   // START Utilities
-  const registerMutationObserver = (element, mutationCallback) => {
+  function registerMutationObserver(element, mutationCallback) {
     const observer = new MutationObserver(mutationCallback);
     observer.observe(element, { childList: true, subtree: true });
-  };
+  }
 
-  const getOrCreateElement = ({
+  function getOrCreateElement({
     tagName,
     className,
     secondaryClassNames,
     parentElement,
     attributes,
-  }) => {
+  }) {
     const selector = `.${className}`;
     let element;
     if (parentElement) {
@@ -90,9 +90,9 @@ MIT
     }
 
     return element;
-  };
+  }
 
-  const getNewButtonText = (button, initialText, endText) => {
+  function getNewButtonText(button, initialText, endText) {
     const currentText = button.innerHTML;
 
     if (!currentText) {
@@ -108,9 +108,9 @@ MIT
     }
 
     return currentText;
-  };
+  }
 
-  const getSlugDBAsync = async () => {
+  async function getSlugDBAsync() {
     /* eslint-disable no-undef */
     // wkof is a global variable added by another UserScript.
     if (typeof wkof === 'undefined') {
@@ -140,9 +140,8 @@ MIT
     const slugDB = wkof.ItemData.get_index(vocabList, 'slug');
 
     return slugDB;
-  };
+  }
   // END Utilities
-
   const isWaniKani = window.location.host === 'www.wanikani.com';
 
   const pathInfo = decodeURI(window.location.pathname).split('/');
@@ -153,7 +152,7 @@ MIT
     ? pathInfo[pathInfo.length - 2]
     : 'vocabulary';
 
-  const screenScrapeCurrentVocabEntry = () => {
+  function screenScrapeCurrentVocabEntry() {
     const primaryMeanings = document.querySelector(
       '#meaning .alternative-meaning:nth-of-type(1) p',
     );
@@ -189,13 +188,13 @@ MIT
       metadata,
       meanings,
     };
-  };
+  }
 
-  const createVocabLine = (vocabEntry) => {
+  function createVocabLine(vocabEntry) {
     return `${vocabEntry.vocab}（${vocabEntry.metadata}）${vocabEntry.meanings}`;
-  };
+  }
 
-  const injectCopyButton = (parentSelector) => {
+  function injectCopyButton(parentSelector) {
     if (currentVocabType !== 'vocabulary' && currentVocabType !== 'kanji') {
       return;
     }
@@ -226,24 +225,24 @@ MIT
 
       button.innerHTML = getNewButtonText(button, initialButtonText, 'Copied');
     };
-  };
+  }
 
-  const createUrl = (vocab) => {
+  function createUrl(vocab) {
     return `https://www.wanikani.com/${currentVocabType}/${vocab}`;
-  };
+  }
 
   const linkStyle = 'margin-right: 15px;line-height: 1.5rem;';
 
-  const createLink = (url, vocab) => {
+  function createLink(url, vocab) {
     let style = linkStyle;
     if (vocab === currentVocab) {
       style += 'color: #666666;';
     }
 
     return `<a href="${url}" style="${style}" target="_blank" rel="noopener noreferrer">${vocab}</a>`;
-  };
+  }
 
-  const parseVocabEntry = (line, lineIndex) => {
+  function parseVocabEntry(line, lineIndex) {
     // match text before a Japanese opening parenthesis and assume it's kanji
     const vocabMatchResult = line.match(/^(.*)（/);
     if (!vocabMatchResult) {
@@ -275,17 +274,17 @@ MIT
       override,
       lineIndex,
     };
-  };
+  }
 
-  const splitNoteIntoLines = (note) => {
+  function splitNoteIntoLines(note) {
     return note.split('<br>').map((line) => line.trim());
-  };
+  }
 
-  const createNoteFromLines = (lines) => {
+  function createNoteFromLines(lines) {
     return lines.join('<br>');
-  };
+  }
 
-  const parseGroups = (note) => {
+  function parseGroups(note) {
     const groups = [[]];
 
     const lines = splitNoteIntoLines(note);
@@ -312,9 +311,9 @@ MIT
     const groupsWithEntries = groups.filter((group) => group.length);
 
     return groupsWithEntries;
-  };
+  }
 
-  const createAllEntry = (group) => {
+  function createAllEntry(group) {
     const urls = group
       .filter((entry) => entry.vocab !== currentVocab)
       // ignore 'All' and 'not on/in WK' entries
@@ -334,9 +333,9 @@ MIT
     return {
       link: allLink,
     };
-  };
+  }
 
-  const addAllLinks = (groups) => {
+  function addAllLinks(groups) {
     return groups.map((group) => {
       const entriesWithUrls = group.filter((entry) => entry.url);
 
@@ -344,9 +343,9 @@ MIT
         ? [...group, createAllEntry(group)]
         : group;
     });
-  };
+  }
 
-  const createCopyEntry = (group) => {
+  function createCopyEntry(group) {
     // ignore the 'All' entry
     const entriesWithVocab = group.filter((entry) => entry.vocab);
 
@@ -370,9 +369,9 @@ MIT
     return {
       link: copyLink,
     };
-  };
+  }
 
-  const addCopyLinks = (groups) => {
+  function addCopyLinks(groups) {
     return groups.map((group) => {
       const entriesWithVocab = group.filter((entry) => entry.vocab);
 
@@ -381,13 +380,13 @@ MIT
         ? [...group, createCopyEntry(group)]
         : group;
     });
-  };
+  }
 
-  const createEverythingEntry = (groups) => {
+  function createEverythingEntry(groups) {
     return createAllEntry(groups.flatMap((group) => group));
-  };
+  }
 
-  const addEverythingLink = (groups) => {
+  function addEverythingLink(groups) {
     const groupsWithAtLeastOneUrl = groups.filter(
       (group) => group.filter((entry) => entry.url).length,
     );
@@ -395,22 +394,22 @@ MIT
     return groupsWithAtLeastOneUrl.length > 1
       ? [...groups, [createEverythingEntry(groups)]]
       : groups;
-  };
+  }
 
-  const generateLinkSectionContent = (groups) => {
+  function generateLinkSectionContent(groups) {
     return groups
       .filter((group) => group.some((entry) => entry.link))
       .map((group) => group.map((entry) => entry.link))
       .map((group) => group.join(''))
       .join('<br>');
-  };
+  }
 
-  const isNoteOpen = (noteElement) => {
+  function isNoteOpen(noteElement) {
     const noteFirstChild = noteElement.firstChild;
     return noteFirstChild && noteFirstChild.nodeName === 'FORM';
-  };
+  }
 
-  const updateLinkSection = (noteElement) => {
+  function updateLinkSection(noteElement) {
     // The note, i.e. rich text editor, will never be open when this function
     // is called on initial script load, but it might be open when this function
     // is called by the DOM mutation handler.
@@ -440,9 +439,9 @@ MIT
 
     const linkSectionContent = generateLinkSectionContent(groups);
     linkSectionElement.innerHTML = linkSectionContent;
-  };
+  }
 
-  const injectLinkSection = (noteSelector) => {
+  function injectLinkSection(noteSelector) {
     if (currentVocabType !== 'vocabulary' && currentVocabType !== 'kanji') {
       return;
     }
@@ -459,9 +458,9 @@ MIT
     registerMutationObserver(noteElement, () => {
       updateLinkSection(noteElement);
     });
-  };
+  }
 
-  const generateNote = (existingNote) => {
+  function generateNote(existingNote) {
     const lines = splitNoteIntoLines(existingNote);
     const groups = parseGroups(existingNote);
 
@@ -497,9 +496,9 @@ MIT
 
     const generatedNote = createNoteFromLines(lines);
     return generatedNote;
-  };
+  }
 
-  const updateUpdateNoteButton = (noteElement) => {
+  function updateUpdateNoteButton(noteElement) {
     const parentElement = noteElement.parentElement;
     if (!parentElement) {
       return;
@@ -525,10 +524,10 @@ MIT
       },
     });
 
-    const hideButton = () => {
+    function hideButton() {
       // hide the button
       button.style = 'display: none;';
-    };
+    }
 
     if (!isNoteOpen(noteElement)) {
       const existingNote = noteElement.innerHTML;
@@ -557,9 +556,9 @@ MIT
       // hide the button because the note is open
       hideButton();
     }
-  };
+  }
 
-  const injectUpdateNoteButton = (noteSelector, slugDB) => {
+  function injectUpdateNoteButton(noteSelector, slugDB) {
     if (currentVocabType !== 'vocabulary' && currentVocabType !== 'kanji') {
       return;
     }
@@ -576,7 +575,7 @@ MIT
     registerMutationObserver(noteElement, () => {
       updateUpdateNoteButton(noteElement, slugDB);
     });
-  };
+  }
 
   injectCopyButton('.row header');
 
