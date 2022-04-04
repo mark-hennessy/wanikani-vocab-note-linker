@@ -4,8 +4,8 @@
 // @description  Creates links for vocabulary in the Meaning Note and Reading Note sections.
 // @version      1.8.3
 // @author       Mark Hennessy
-// @match        https://www.wanikani.com/vocabulary/*
 // @match        https://www.wanikani.com/kanji/*
+// @match        https://www.wanikani.com/vocabulary/*
 // @license      MIT
 // ==/UserScript==
 
