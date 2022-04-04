@@ -2,7 +2,7 @@
 // @name         WaniKani Vocab Note Linker
 // @namespace    http://tampermonkey.net/
 // @description  Creates links for vocabulary in the Meaning Note and Reading Note sections.
-// @version      1.8.3
+// @version      1.8.4
 // @author       Mark Hennessy
 // @match        https://www.wanikani.com/kanji/*
 // @match        https://www.wanikani.com/vocabulary/*
@@ -110,7 +110,7 @@ MIT
     return currentText;
   }
 
-  async function getSlugDBAsync() {
+  async function getSlugDB() {
     /* eslint-disable no-undef */
     // wkof is a global variable added by another UserScript.
     if (typeof wkof === 'undefined') {
@@ -135,24 +135,23 @@ MIT
     // to update it's local cache efficiently.
     const items = await wkof.ItemData.get_items(config);
 
-    const typeDB = wkof.ItemData.get_index(items, 'item_type');
-    const vocabList = typeDB[currentVocabType];
-    const slugDB = wkof.ItemData.get_index(vocabList, 'slug');
+    const subjectTypeDB = wkof.ItemData.get_index(items, 'item_type');
+    const subjects = subjectTypeDB[currentSubjectType];
+    const slugDB = wkof.ItemData.get_index(subjects, 'slug');
 
     return slugDB;
   }
   // END Utilities
-  const isWaniKani = window.location.host === 'www.wanikani.com';
 
-  const pathInfo = decodeURI(window.location.pathname).split('/');
+  const waniKani = window.location.host === 'www.wanikani.com';
 
-  const currentVocab = isWaniKani ? pathInfo[pathInfo.length - 1] : '大変';
+  const pathParts = decodeURI(window.location.pathname).split('/');
 
-  const currentVocabType = isWaniKani
-    ? pathInfo[pathInfo.length - 2]
-    : 'vocabulary';
+  const currentSubjectType = waniKani ? pathParts[0] : 'vocabulary';
 
-  function screenScrapeCurrentVocabEntry() {
+  const currentSlug = waniKani ? pathParts[1] : '大変';
+
+  function screenScrapeCurrentEntry() {
     const primaryMeanings = document.querySelector(
       '#meaning .alternative-meaning:nth-of-type(1) p',
     );
@@ -168,11 +167,11 @@ MIT
       .join(', ');
 
     let readingNodeList;
-    if (currentVocabType === 'vocabulary') {
+    if (currentSubjectType === 'vocabulary') {
       readingNodeList = document.querySelectorAll(
         '.pronunciation-group .pronunciation-variant',
       );
-    } else if (currentVocabType === 'kanji') {
+    } else if (currentSubjectType === 'kanji') {
       readingNodeList = document.querySelectorAll(
         '#reading .span4 p[lang="ja"]',
       );
@@ -184,18 +183,18 @@ MIT
       .join('、');
 
     return {
-      vocab: currentVocab,
+      slug: currentSlug,
       metadata,
       meanings,
     };
   }
 
-  function createVocabLine(vocabEntry) {
-    return `${vocabEntry.vocab}（${vocabEntry.metadata}）${vocabEntry.meanings}`;
+  function createEntryLine(entry) {
+    return `${entry.slug}（${entry.metadata}）${entry.meanings}`;
   }
 
   function injectCopyButton(parentSelector) {
-    if (currentVocabType !== 'vocabulary' && currentVocabType !== 'kanji') {
+    if (currentSubjectType !== 'vocabulary' && currentSubjectType !== 'kanji') {
       return;
     }
 
@@ -218,38 +217,38 @@ MIT
     const initialButtonText = 'Copy';
     button.innerHTML = initialButtonText;
     button.onclick = () => {
-      const vocabEntry = screenScrapeCurrentVocabEntry();
-      const vocabLine = createVocabLine(vocabEntry);
+      const entry = screenScrapeCurrentEntry();
+      const entryLine = createEntryLine(entry);
 
-      navigator.clipboard.writeText(vocabLine);
+      navigator.clipboard.writeText(entryLine);
 
       button.innerHTML = getNewButtonText(button, initialButtonText, 'Copied');
     };
   }
 
-  function createUrl(vocab) {
-    return `https://www.wanikani.com/${currentVocabType}/${vocab}`;
+  function createUrl(slug) {
+    return `https://www.wanikani.com/${currentSubjectType}/${slug}`;
   }
 
   const linkStyle = 'margin-right: 15px;line-height: 1.5rem;';
 
-  function createLink(url, vocab) {
+  function createLink(url, slug) {
     let style = linkStyle;
-    if (vocab === currentVocab) {
+    if (slug === currentSlug) {
       style += 'color: #666666;';
     }
 
-    return `<a href="${url}" style="${style}" target="_blank" rel="noopener noreferrer">${vocab}</a>`;
+    return `<a href="${url}" style="${style}" target="_blank" rel="noopener noreferrer">${slug}</a>`;
   }
 
-  function parseVocabEntry(line, lineIndex) {
+  function parseEntry(line, lineIndex) {
     // match text before a Japanese opening parenthesis and assume it's kanji
-    const vocabMatchResult = line.match(/^(.*)（/);
-    if (!vocabMatchResult) {
+    const entryMatchResult = line.match(/^(.*)（/);
+    if (!entryMatchResult) {
       return null;
     }
 
-    const vocab = vocabMatchResult[1];
+    const slug = entryMatchResult[1];
 
     // math text between Japanese opening and closing parentheses and assume it's metadata
     const metadataMatchResult = line.match(/^.*（(.*)）/);
@@ -261,11 +260,11 @@ MIT
 
     const notOnWk = /not on WK/.test(metadata);
     const override = /override/.test(metadata);
-    const url = !notOnWk ? createUrl(vocab) : null;
-    const link = !notOnWk ? createLink(url, vocab) : null;
+    const url = !notOnWk ? createUrl(slug) : null;
+    const link = !notOnWk ? createLink(url, slug) : null;
 
     return {
-      vocab,
+      slug,
       metadata,
       meanings,
       url,
@@ -288,12 +287,13 @@ MIT
     const groups = [[]];
 
     const lines = splitNoteIntoLines(note);
-    lines.forEach((line, lineIndex) => {
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
       const currentGroup = groups[groups.length - 1];
 
-      const vocabEntry = parseVocabEntry(line, lineIndex);
+      const entry = parseEntry(line, i);
 
-      if (!vocabEntry) {
+      if (!entry) {
         if (currentGroup.length) {
           // start a new group
           groups.push([]);
@@ -303,8 +303,8 @@ MIT
         return;
       }
 
-      currentGroup.push(vocabEntry);
-    });
+      currentGroup.push(entry);
+    }
 
     // there may be empty groups, that need to be filtered out,
     // if the note ended in blank lines or remarks
@@ -315,7 +315,7 @@ MIT
 
   function createAllEntry(group) {
     const urls = group
-      .filter((entry) => entry.vocab !== currentVocab)
+      .filter((entry) => entry.slug !== currentSlug)
       // ignore 'All' and 'not on/in WK' entries
       .filter((entry) => entry.url)
       .map((entry) => entry.url);
@@ -346,11 +346,10 @@ MIT
   }
 
   function createCopyEntry(group) {
-    // ignore the 'All' entry
-    const entriesWithVocab = group.filter((entry) => entry.vocab);
+    const entriesWithSlug = getEntriesWithSlug(group);
 
-    const groupText = entriesWithVocab
-      .map(createVocabLine)
+    const groupText = entriesWithSlug
+      .map(createEntryLine)
       .join('\\n')
       // The onclick function is defined as one big string surrounded by double quotes,
       // and clipboard.writeText (inside of onclick) surrounds text with single quotes,
@@ -360,7 +359,7 @@ MIT
 
     const onclick = `navigator.clipboard.writeText('${groupText}');return false;`;
 
-    const hasLinks = entriesWithVocab.some((entry) => entry.link);
+    const hasLinks = entriesWithSlug.some((entry) => entry.link);
 
     const copyLink = `<a href="#" style="${linkStyle}" onclick="${onclick}">${
       hasLinks ? 'Copy' : 'Copy (not on WK)'
@@ -373,13 +372,18 @@ MIT
 
   function addCopyLinks(groups) {
     return groups.map((group) => {
-      const entriesWithVocab = group.filter((entry) => entry.vocab);
+      const entriesWithSlug = getEntriesWithSlug(group);
 
       // don't add the 'Copy' entry to the group at the bottom with a single 'All' entry
-      return entriesWithVocab.length > 0
+      return entriesWithSlug.length > 0
         ? [...group, createCopyEntry(group)]
         : group;
     });
+  }
+
+  function getEntriesWithSlug(group) {
+    // filter out the 'All' link entry
+    return group.filter((entry) => entry.slug);
   }
 
   function createEverythingEntry(groups) {
@@ -442,7 +446,7 @@ MIT
   }
 
   function injectLinkSection(noteSelector) {
-    if (currentVocabType !== 'vocabulary' && currentVocabType !== 'kanji') {
+    if (currentSubjectType !== 'vocabulary' && currentSubjectType !== 'kanji') {
       return;
     }
 
@@ -468,15 +472,15 @@ MIT
       .flatMap((group) => group)
       .filter((entry) => !entry.notOnWk && !entry.override);
 
-    wkEntries.forEach((entry) => {
-      const vocabInfo = slugDB[entry.vocab];
+    for (const entry of wkEntries) {
+      const subject = slugDB[entry.slug];
 
       // if no info is available, then assume the existing line is up-to-date
-      if (!vocabInfo) {
+      if (!subject) {
         return;
       }
 
-      const { meanings } = vocabInfo.data;
+      const { meanings } = subject.data;
       const generatedMeanings = [
         ...meanings.filter((m) => m.primary),
         ...meanings.filter((m) => !m.primary),
@@ -484,18 +488,17 @@ MIT
         .map((m) => m.meaning)
         .join(', ');
 
-      const generatedLine = createVocabLine({
-        vocab: entry.vocab,
+      const entryLine = createEntryLine({
+        slug: entry.slug,
         metadata: entry.metadata,
         meanings: generatedMeanings,
       });
 
       const { lineIndex } = entry;
-      lines[lineIndex] = generatedLine;
-    });
+      lines[lineIndex] = entryLine;
+    }
 
-    const generatedNote = createNoteFromLines(lines);
-    return generatedNote;
+    return createNoteFromLines(lines);
   }
 
   function updateUpdateNoteButton(noteElement) {
@@ -559,7 +562,7 @@ MIT
   }
 
   function injectUpdateNoteButton(noteSelector, slugDB) {
-    if (currentVocabType !== 'vocabulary' && currentVocabType !== 'kanji') {
+    if (currentSubjectType !== 'vocabulary' && currentSubjectType !== 'kanji') {
       return;
     }
 
@@ -580,10 +583,12 @@ MIT
   injectCopyButton('.row header');
 
   const noteSelectors = ['.note-meaning', '.note-reading'];
-  noteSelectors.forEach(injectLinkSection);
+  for (const noteSelector of noteSelectors) {
+    injectLinkSection(noteSelector);
+  }
 
-  const slugDB = await getSlugDBAsync();
-  noteSelectors.forEach((noteSelector) =>
-    injectUpdateNoteButton(noteSelector, slugDB),
-  );
+  const slugDB = await getSlugDB();
+  for (const noteSelector of noteSelectors) {
+    injectUpdateNoteButton(noteSelector, slugDB);
+  }
 })();
