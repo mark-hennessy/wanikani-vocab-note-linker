@@ -2,7 +2,7 @@
 // @name         WaniKani Vocab Note Linker
 // @namespace    http://tampermonkey.net/
 // @description  Creates links for vocabulary in the Meaning Note and Reading Note sections.
-// @version      1.8.4
+// @version      1.8.5
 // @author       Mark Hennessy
 // @match        https://www.wanikani.com/kanji/*
 // @match        https://www.wanikani.com/vocabulary/*
@@ -145,7 +145,9 @@ MIT
 
   const waniKani = window.location.host === 'www.wanikani.com';
 
-  const pathParts = decodeURI(window.location.pathname).split('/');
+  const pathParts = decodeURI(window.location.pathname)
+    .split('/')
+    .filter(Boolean);
 
   const currentSubjectType = waniKani ? pathParts[0] : 'vocabulary';
 
