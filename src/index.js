@@ -2,7 +2,7 @@
 // @name         WaniKani Vocab Note Linker
 // @namespace    http://tampermonkey.net/
 // @description  Creates links for vocabulary in the Meaning Note and Reading Note sections.
-// @version      1.8.5
+// @version      1.8.6
 // @author       Mark Hennessy
 // @match        https://www.wanikani.com/kanji/*
 // @match        https://www.wanikani.com/vocabulary/*
@@ -302,7 +302,7 @@ MIT
         }
 
         // continue to the next line
-        return;
+        continue;
       }
 
       currentGroup.push(entry);
@@ -479,7 +479,7 @@ MIT
 
       // if no info is available, then assume the existing line is up-to-date
       if (!subject) {
-        return;
+        continue;
       }
 
       const { meanings } = subject.data;
