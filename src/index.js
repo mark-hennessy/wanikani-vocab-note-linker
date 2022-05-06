@@ -2,7 +2,7 @@
 // @name         WaniKani Vocab Note Linker
 // @namespace    http://tampermonkey.net/
 // @description  Creates links for vocabulary in the Meaning Note and Reading Note sections.
-// @version      1.8.6
+// @version      1.8.7
 // @author       Mark Hennessy
 // @match        https://www.wanikani.com/kanji/*
 // @match        https://www.wanikani.com/vocabulary/*
@@ -423,28 +423,27 @@ MIT
       return;
     }
 
-    noteElement.setAttribute('lang', 'ja');
-
-    const parentElement = noteElement.parentElement;
-    if (!parentElement) {
+    const noteSectionElement = noteElement.parentElement;
+    if (!noteSectionElement) {
       return;
     }
 
-    const note = noteElement.innerHTML;
+    noteSectionElement.setAttribute('lang', 'ja');
 
     const linkSectionElement = getOrCreateElement({
       tagName: 'div',
       className: 'link-section',
-      parentElement,
+      parentElement: noteSectionElement,
     });
+
+    const note = noteElement.innerHTML;
 
     let groups = parseGroups(note);
     groups = addAllLinks(groups);
     groups = addCopyLinks(groups);
     groups = addEverythingLink(groups);
 
-    const linkSectionContent = generateLinkSectionContent(groups);
-    linkSectionElement.innerHTML = linkSectionContent;
+    linkSectionElement.innerHTML = generateLinkSectionContent(groups);
   }
 
   function injectLinkSection(noteSelector) {
