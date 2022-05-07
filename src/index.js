@@ -2,7 +2,7 @@
 // @name         WaniKani Vocab Note Linker
 // @namespace    http://tampermonkey.net/
 // @description  Creates links for vocabulary in the Meaning Note and Reading Note sections.
-// @version      1.8.9
+// @version      1.9.0
 // @author       Mark Hennessy
 // @match        https://www.wanikani.com/kanji/*
 // @match        https://www.wanikani.com/vocabulary/*
@@ -547,7 +547,7 @@ MIT
   }
 
   const noteElements = ['.note-meaning', '.note-reading']
-    .map(document.querySelector)
+    .map((noteSelector) => document.querySelector(noteSelector))
     .filter(Boolean);
 
   // do this first, before calling getSlugDB, to reduce flashing
