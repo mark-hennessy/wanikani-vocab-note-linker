@@ -2,7 +2,7 @@
 // @name         WaniKani Vocab Note Linker
 // @namespace    http://tampermonkey.net/
 // @description  Creates links for vocabulary in the Meaning Note and Reading Note sections.
-// @version      1.8.7
+// @version      1.8.8
 // @author       Mark Hennessy
 // @match        https://www.wanikani.com/kanji/*
 // @match        https://www.wanikani.com/vocabulary/*
@@ -68,6 +68,7 @@ MIT
     attributes,
   }) {
     const selector = `.${className}`;
+
     let element;
     if (parentElement) {
       element = parentElement.querySelector(selector);
@@ -196,10 +197,6 @@ MIT
   }
 
   function injectCopyButton(parentSelector) {
-    if (currentSubjectType !== 'vocabulary' && currentSubjectType !== 'kanji') {
-      return;
-    }
-
     const parentElement = document.querySelector(parentSelector);
     if (!parentElement) {
       return;
@@ -423,17 +420,10 @@ MIT
       return;
     }
 
-    const noteSectionElement = noteElement.parentElement;
-    if (!noteSectionElement) {
-      return;
-    }
-
-    noteSectionElement.setAttribute('lang', 'ja');
-
     const linkSectionElement = getOrCreateElement({
       tagName: 'div',
       className: 'link-section',
-      parentElement: noteSectionElement,
+      parentElement: noteElement.parentElement,
     });
 
     const note = noteElement.innerHTML;
@@ -446,16 +436,7 @@ MIT
     linkSectionElement.innerHTML = generateLinkSectionContent(groups);
   }
 
-  function injectLinkSection(noteSelector) {
-    if (currentSubjectType !== 'vocabulary' && currentSubjectType !== 'kanji') {
-      return;
-    }
-
-    const noteElement = document.querySelector(noteSelector);
-    if (!noteElement) {
-      return;
-    }
-
+  function injectLinkSection(noteElement) {
     // initialization
     updateLinkSection(noteElement);
 
@@ -503,11 +484,6 @@ MIT
   }
 
   function updateUpdateNoteButton(noteElement) {
-    const parentElement = noteElement.parentElement;
-    if (!parentElement) {
-      return;
-    }
-
     const ignoreUpdateAttributeName = 'data-ignore-update';
 
     // if the ignore-update attribute is present, then assume
@@ -522,7 +498,7 @@ MIT
       className: 'update-note-button',
       // just use the global WaniKani button styles
       secondaryClassNames: 'btn btn-mini',
-      parentElement,
+      parentElement: noteElement.parentElement,
       attributes: {
         type: 'button',
       },
@@ -562,34 +538,31 @@ MIT
     }
   }
 
-  function injectUpdateNoteButton(noteSelector, slugDB) {
-    if (currentSubjectType !== 'vocabulary' && currentSubjectType !== 'kanji') {
-      return;
-    }
-
-    const noteElement = document.querySelector(noteSelector);
-    if (!noteElement) {
-      return;
-    }
-
+  function injectUpdateNoteButton(noteElement) {
     // initialization
-    updateUpdateNoteButton(noteElement, slugDB);
+    updateUpdateNoteButton(noteElement);
 
     // register a DOM change handler
     registerMutationObserver(noteElement, () => {
-      updateUpdateNoteButton(noteElement, slugDB);
+      updateUpdateNoteButton(noteElement);
     });
   }
+
+  // global
+  const slugDB = await getSlugDB();
 
   injectCopyButton('.row header');
 
   const noteSelectors = ['.note-meaning', '.note-reading'];
   for (const noteSelector of noteSelectors) {
-    injectLinkSection(noteSelector);
-  }
+    const noteElement = document.querySelector(noteSelector);
+    if (!noteElement) {
+      continue;
+    }
 
-  const slugDB = await getSlugDB();
-  for (const noteSelector of noteSelectors) {
-    injectUpdateNoteButton(noteSelector, slugDB);
+    noteElement.parentElement?.setAttribute('lang', 'ja');
+
+    injectLinkSection(noteElement);
+    injectUpdateNoteButton(noteElement);
   }
 })();
