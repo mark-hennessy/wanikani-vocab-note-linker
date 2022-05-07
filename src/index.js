@@ -2,7 +2,7 @@
 // @name         WaniKani Vocab Note Linker
 // @namespace    http://tampermonkey.net/
 // @description  Creates links for vocabulary in the Meaning Note and Reading Note sections.
-// @version      1.8.8
+// @version      1.8.9
 // @author       Mark Hennessy
 // @match        https://www.wanikani.com/kanji/*
 // @match        https://www.wanikani.com/vocabulary/*
@@ -138,9 +138,7 @@ MIT
 
     const subjectTypeDB = wkof.ItemData.get_index(items, 'item_type');
     const subjects = subjectTypeDB[currentSubjectType];
-    const slugDB = wkof.ItemData.get_index(subjects, 'slug');
-
-    return slugDB;
+    return wkof.ItemData.get_index(subjects, 'slug');
   }
   // END Utilities
 
@@ -548,20 +546,21 @@ MIT
     });
   }
 
-  // global
-  const slugDB = await getSlugDB();
+  const noteElements = ['.note-meaning', '.note-reading']
+    .map(document.querySelector)
+    .filter(Boolean);
+
+  // do this first, before calling getSlugDB, to reduce flashing
+  for (const noteElement of noteElements) {
+    noteElement.parentElement?.setAttribute('lang', 'ja');
+  }
 
   injectCopyButton('.row header');
 
-  const noteSelectors = ['.note-meaning', '.note-reading'];
-  for (const noteSelector of noteSelectors) {
-    const noteElement = document.querySelector(noteSelector);
-    if (!noteElement) {
-      continue;
-    }
+  // slugDB will be globally available to other functions
+  const slugDB = await getSlugDB();
 
-    noteElement.parentElement?.setAttribute('lang', 'ja');
-
+  for (const noteElement of noteElements) {
     injectLinkSection(noteElement);
     injectUpdateNoteButton(noteElement);
   }
