@@ -2,7 +2,7 @@
 // @name         WaniKani Vocab Note Linker
 // @namespace    http://tampermonkey.net/
 // @description  Creates links for vocabulary in the Meaning Note and Reading Note sections.
-// @version      1.9.0
+// @version      1.9.1
 // @author       Mark Hennessy
 // @match        https://www.wanikani.com/kanji/*
 // @match        https://www.wanikani.com/vocabulary/*
@@ -62,21 +62,24 @@ MIT
 
   function getOrCreateElement({
     tagName,
-    className,
-    secondaryClassNames,
+    selectorClass,
+    classes,
     parentElement,
+    siblingElement,
     attributes,
   }) {
-    const selector = `.${className}`;
+    const selector = `.${selectorClass}`;
 
     let element;
     if (parentElement) {
       element = parentElement.querySelector(selector);
+    } else if (siblingElement) {
+      element = siblingElement.parentElement?.querySelector(selector);
     }
 
     if (!element) {
       element = document.createElement(tagName);
-      const cn = [className, secondaryClassNames].filter(Boolean).join(' ');
+      const cn = [selectorClass, classes].filter(Boolean).join(' ');
       if (cn) {
         element.className = cn;
       }
@@ -87,6 +90,8 @@ MIT
 
       if (parentElement) {
         parentElement.appendChild(element);
+      } else if (siblingElement) {
+        siblingElement.after(element);
       }
     }
 
@@ -142,23 +147,28 @@ MIT
   }
   // END Utilities
 
-  const waniKani = window.location.host === 'www.wanikani.com';
+  const isWaniKani = window.location.host === 'www.wanikani.com';
 
   const pathParts = decodeURI(window.location.pathname)
     .split('/')
     .filter(Boolean);
 
-  const currentSubjectType = waniKani ? pathParts[0] : 'vocabulary';
+  const currentSubjectType = isWaniKani ? pathParts[0] : 'vocabulary';
+  const isKanji = currentSubjectType === 'kanji';
 
-  const currentSlug = waniKani ? pathParts[1] : '大変';
+  const currentSlug = isWaniKani ? pathParts[1] : '大変';
 
   function screenScrapeCurrentEntry() {
     const primaryMeanings = document.querySelector(
-      '#meaning .alternative-meaning:nth-of-type(1) p',
+      isKanji
+        ? '.subject-section--meaning .subject-section__meanings:nth-of-type(1) p'
+        : '#meaning .alternative-meaning:nth-of-type(1) p',
     );
 
     const secondaryMeanings = document.querySelector(
-      '#meaning .alternative-meaning:nth-of-type(2) p',
+      isKanji
+        ? '.subject-section--meaning .subject-section__meanings:nth-of-type(2) p'
+        : '#meaning .alternative-meaning:nth-of-type(2) p',
     );
 
     const meanings = [primaryMeanings, secondaryMeanings]
@@ -167,16 +177,11 @@ MIT
       .filter((v) => v !== 'None')
       .join(', ');
 
-    let readingNodeList;
-    if (currentSubjectType === 'vocabulary') {
-      readingNodeList = document.querySelectorAll(
-        '.pronunciation-group .pronunciation-variant',
-      );
-    } else if (currentSubjectType === 'kanji') {
-      readingNodeList = document.querySelectorAll(
-        '#reading .span4 p[lang="ja"]',
-      );
-    }
+    const readingNodeList = document.querySelectorAll(
+      isKanji
+        ? '.subject-section--reading .subject-readings__reading-items'
+        : '.pronunciation-group .pronunciation-variant',
+    );
 
     const metadata = Array.from(readingNodeList)
       .map((el) => el.textContent.trim())
@@ -194,18 +199,21 @@ MIT
     return `${entry.slug}（${entry.metadata}）${entry.meanings}`;
   }
 
-  function injectCopyButton(parentSelector) {
-    const parentElement = document.querySelector(parentSelector);
-    if (!parentElement) {
+  function injectCopyButton() {
+    const siblingElement = document.querySelector(
+      isKanji ? '.page-nav' : '.row header',
+    );
+
+    if (!siblingElement) {
       return;
     }
 
     const button = getOrCreateElement({
       tagName: 'button',
-      className: 'copy-button',
+      selectorClass: 'copy-button',
       // just use the global WaniKani button styles
-      secondaryClassNames: 'btn btn-mini',
-      parentElement,
+      classes: 'subject-progress__button btn btn-mini',
+      siblingElement,
       attributes: {
         type: 'button',
       },
@@ -420,7 +428,7 @@ MIT
 
     const linkSectionElement = getOrCreateElement({
       tagName: 'div',
-      className: 'link-section',
+      selectorClass: 'link-section',
       parentElement: noteElement.parentElement,
     });
 
@@ -493,9 +501,9 @@ MIT
 
     const button = getOrCreateElement({
       tagName: 'button',
-      className: 'update-note-button',
+      selectorClass: 'update-note-button',
       // just use the global WaniKani button styles
-      secondaryClassNames: 'btn btn-mini',
+      classes: 'btn btn-mini',
       parentElement: noteElement.parentElement,
       attributes: {
         type: 'button',
@@ -555,7 +563,11 @@ MIT
     noteElement.parentElement?.setAttribute('lang', 'ja');
   }
 
-  injectCopyButton('.row header');
+  injectCopyButton();
+  if (isKanji) {
+    // TODO: WK changed their website and this script still needs to be updated
+    return;
+  }
 
   // slugDB will be globally available to other functions
   const slugDB = await getSlugDB();
