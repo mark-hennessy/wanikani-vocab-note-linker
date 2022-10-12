@@ -2,7 +2,7 @@
 // @name         WaniKani Vocab Note Linker
 // @namespace    http://tampermonkey.net/
 // @description  Creates links for vocabulary in the Meaning Note and Reading Note sections.
-// @version      1.9.2
+// @version      1.9.3
 // @author       Mark Hennessy
 // @match        https://www.wanikani.com/kanji/*
 // @match        https://www.wanikani.com/vocabulary/*
@@ -127,9 +127,7 @@ MIT
 
   for (const noteElement of noteElements) {
     injectLinkSection(noteElement);
-
-    // TODO: needs to be fixed since WK changed
-    // injectUpdateNoteButton(noteElement);
+    injectUpdateNoteButton(noteElement);
   }
 
   function getNoteElements() {
@@ -240,10 +238,7 @@ MIT
       parentElement: noteElement.parentElement,
     });
 
-    const note = isKanji
-      ? noteElement.firstElementChild?.textContent.trim()
-      : noteElement.innerHTML;
-
+    const note = getNote(noteElement);
     if (!note) {
       return;
     }
@@ -258,6 +253,12 @@ MIT
 
   function isNoteOpen(noteElement) {
     return noteElement.firstElementChild?.nodeName === 'FORM';
+  }
+
+  function getNote(noteElement) {
+    return isKanji
+      ? noteElement.firstElementChild?.textContent.trim()
+      : noteElement.innerHTML;
   }
 
   function parseGroups(note) {
@@ -469,33 +470,51 @@ MIT
       button.classList.add('vnl-hidden');
     }
 
-    if (!isNoteOpen(noteElement)) {
-      const existingNote = noteElement.innerHTML;
-      const generatedNote = generateNote(existingNote);
-
-      if (existingNote !== generatedNote) {
-        // reset the button
-        const initialButtonText = 'Update note';
-        button.innerHTML = initialButtonText;
-        button.classList.remove('vnl-hidden');
-        button.onclick = async () => {
-          noteElement.setAttribute(ignoreUpdateAttributeName, '');
-          noteElement.innerHTML = generatedNote;
-
-          button.innerHTML = getNewButtonText(
-            button,
-            initialButtonText,
-            'Manually open note and click save',
-          );
-        };
-      } else {
-        // hide the button because there is nothing to update
-        hideButton();
-      }
-    } else {
-      // hide the button because the note is open
+    if (isNoteOpen(noteElement)) {
       hideButton();
+      return;
     }
+
+    const existingNote = getNote(noteElement);
+    if (!existingNote) {
+      return;
+    }
+
+    const generatedNote = generateNote(existingNote);
+    if (existingNote === generatedNote) {
+      hideButton();
+      return;
+    }
+
+    const initialButtonText = 'Update note';
+    button.innerHTML = initialButtonText;
+    button.classList.remove('vnl-hidden');
+
+    button.onclick = async () => {
+      noteElement.setAttribute(ignoreUpdateAttributeName, '');
+
+      if (isKanji) {
+        const observer = registerMutationObserver(noteElement, () => {
+          // assume the textArea loaded and disconnect the observer
+          observer.disconnect();
+
+          const textArea = noteElement.querySelector('.user-note__input');
+          if (textArea) {
+            textArea.innerHTML = generatedNote;
+          }
+        });
+
+        // click the RTE anchor element to load the textArea
+        noteElement.firstElementChild.click();
+      } else {
+        noteElement.innerHTML = generatedNote;
+        button.innerHTML = getNewButtonText(
+          button,
+          initialButtonText,
+          'Manually open note and click save',
+        );
+      }
+    };
   }
 
   function generateNote(existingNote) {
@@ -568,6 +587,7 @@ MIT
   function registerMutationObserver(element, mutationCallback) {
     const observer = new MutationObserver(mutationCallback);
     observer.observe(element, { childList: true, subtree: true });
+    return observer;
   }
 
   function getOrCreateElement({
