@@ -2,7 +2,7 @@
 // @name         WaniKani Vocab Note Linker
 // @namespace    http://tampermonkey.net/
 // @description  Creates links for vocabulary in the Meaning Note and Reading Note sections.
-// @version      1.9.4
+// @version      1.9.5
 // @author       Mark Hennessy
 // @match        https://www.wanikani.com/kanji/*
 // @match        https://www.wanikani.com/vocabulary/*
@@ -81,7 +81,7 @@ MIT
   }
 
   .vnl-link-section {
-    margin-top: 24px;
+    margin-top: 30px;
   }
 
   .vnl-link {
@@ -107,7 +107,7 @@ MIT
 
   /* add space between paragraphs in the WK Rich Text Editor */
   .user-note__text {
-    margin-bottom: 16px;
+    margin-bottom: 20px;
   }
 `;
 
