@@ -2,7 +2,7 @@
 // @name         WaniKani Vocab Note Linker
 // @namespace    http://tampermonkey.net/
 // @description  Creates links for vocabulary in the Meaning Note and Reading Note sections.
-// @version      1.9.3
+// @version      1.9.4
 // @author       Mark Hennessy
 // @match        https://www.wanikani.com/kanji/*
 // @match        https://www.wanikani.com/vocabulary/*
@@ -65,7 +65,7 @@ MIT
 
   const currentSlug = isWaniKani ? pathParts[1] : '大変';
 
-  const noteLineDelimiter = isKanji ? '\n' : '<br>';
+  const noteLineDelimiter = '\n';
 
   const CSS = `
   .vnl-button {
@@ -81,7 +81,7 @@ MIT
   }
 
   .vnl-link-section {
-    margin-bottom: 16px;
+    margin-top: 24px;
   }
 
   .vnl-link {
@@ -131,9 +131,7 @@ MIT
   }
 
   function getNoteElements() {
-    const noteSelectors = isKanji
-      ? ['#user_meaning_note', '#user_reading_note']
-      : ['.note-meaning', '.note-reading'];
+    const noteSelectors = ['#user_meaning_note', '#user_reading_note'];
 
     const noteElements = noteSelectors
       .map((noteSelector) => document.querySelector(noteSelector))
@@ -143,10 +141,7 @@ MIT
   }
 
   function injectCopyButton() {
-    const siblingElement = document.querySelector(
-      isKanji ? '.page-nav' : '.row header',
-    );
-
+    const siblingElement = document.querySelector('.page-nav');
     if (!siblingElement) {
       return;
     }
@@ -175,15 +170,11 @@ MIT
 
   function screenScrapeCurrentEntry() {
     const primaryMeanings = document.querySelector(
-      isKanji
-        ? '.subject-section--meaning .subject-section__meanings:nth-of-type(1) p'
-        : '#meaning .alternative-meaning:nth-of-type(1) p',
+      '.subject-section--meaning .subject-section__meanings:nth-of-type(1) .subject-section__meanings-items',
     );
 
     const secondaryMeanings = document.querySelector(
-      isKanji
-        ? '.subject-section--meaning .subject-section__meanings:nth-of-type(2) p'
-        : '#meaning .alternative-meaning:nth-of-type(2) p',
+      '.subject-section--meaning .subject-section__meanings:nth-of-type(2) .subject-section__meanings-items',
     );
 
     const meanings = [primaryMeanings, secondaryMeanings]
@@ -195,7 +186,7 @@ MIT
     const readingNodeList = document.querySelectorAll(
       isKanji
         ? '.subject-section--reading .subject-readings__reading-items'
-        : '.pronunciation-group .pronunciation-variant',
+        : '.subject-section--reading .subject-readings-with-audio__reading',
     );
 
     const metadata = Array.from(readingNodeList)
@@ -256,9 +247,7 @@ MIT
   }
 
   function getNote(noteElement) {
-    return isKanji
-      ? noteElement.firstElementChild?.textContent.trim()
-      : noteElement.innerHTML;
+    return noteElement.firstElementChild?.textContent.trim();
   }
 
   function parseGroups(note) {
@@ -493,27 +482,18 @@ MIT
     button.onclick = async () => {
       noteElement.setAttribute(ignoreUpdateAttributeName, '');
 
-      if (isKanji) {
-        const observer = registerMutationObserver(noteElement, () => {
-          // assume the textArea loaded and disconnect the observer
-          observer.disconnect();
+      const observer = registerMutationObserver(noteElement, () => {
+        // assume the textArea loaded and disconnect the observer
+        observer.disconnect();
 
-          const textArea = noteElement.querySelector('.user-note__input');
-          if (textArea) {
-            textArea.innerHTML = generatedNote;
-          }
-        });
+        const textArea = noteElement.querySelector('.user-note__input');
+        if (textArea) {
+          textArea.innerHTML = generatedNote;
+        }
+      });
 
-        // click the RTE anchor element to load the textArea
-        noteElement.firstElementChild.click();
-      } else {
-        noteElement.innerHTML = generatedNote;
-        button.innerHTML = getNewButtonText(
-          button,
-          initialButtonText,
-          'Manually open note and click save',
-        );
-      }
+      // click the RTE anchor element to load the textArea
+      noteElement.firstElementChild.click();
     };
   }
 
