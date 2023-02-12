@@ -2,7 +2,7 @@
 // @name         WaniKani Vocab Note Linker
 // @namespace    http://tampermonkey.net/
 // @description  Creates links for vocabulary in the Meaning Note and Reading Note sections.
-// @version      1.9.5
+// @version      1.9.6
 // @author       Mark Hennessy
 // @match        https://www.wanikani.com/kanji/*
 // @match        https://www.wanikani.com/vocabulary/*
@@ -293,11 +293,13 @@ MIT
 
     const slug = entryMatchResult[1];
 
-    // math text between Japanese opening and closing parentheses and assume it's metadata
+    // math text between Japanese opening and closing parentheses and assume
+    // it's metadata
     const metadataMatchResult = line.match(/^.*（(.*)）/);
     const metadata = metadataMatchResult ? metadataMatchResult[1] : null;
 
-    // match text after Japanese opening and closing parentheses and assume it's a list of English meanings
+    // match text after Japanese opening and closing parentheses and assume
+    // it's a list of English meanings
     const meaningsMatchResult = line.match(/^.*（.*）(.*)/);
     const meanings = meaningsMatchResult ? meaningsMatchResult[1] : null;
 
@@ -365,7 +367,8 @@ MIT
     return groups.map((group) => {
       const entriesWithSlug = getEntriesWithSlug(group);
 
-      // don't add the 'Copy' entry to the group at the bottom with a single 'All' entry
+      // don't add the 'Copy' entry to the group at the bottom with a single
+      // 'All' entry
       return entriesWithSlug.length > 0
         ? [...group, createCopyEntry(group)]
         : group;
@@ -383,9 +386,10 @@ MIT
     const groupText = entriesWithSlug
       .map(createEntryLine)
       .join('\\n')
-      // The onclick function is defined as one big string surrounded by double quotes,
-      // and clipboard.writeText (inside of onclick) surrounds text with single quotes,
-      // so both single quotes and double quotes inside of the text need to be escaped!
+      // The onclick function is defined as one big string surrounded by double
+      // quotes, and clipboard.writeText (inside of onclick) surrounds text
+      // with single quotes, so both single quotes and double quotes inside of
+      // the text need to be escaped!
       .replace(/'/g, "\\'")
       .replace(/"/g, '\\"');
 
@@ -628,10 +632,15 @@ MIT
 
   async function getSlugDB() {
     /* eslint-disable no-undef */
-    // wkof is a global variable added by another UserScript.
+    // wkof is a global variable added by another user script
     if (typeof wkof === 'undefined') {
       return [];
     }
+
+    // Jquery needs to be included to prevent wkof from crashing when apiv2_key
+    // is not already set in local storage
+    wkof.include('Jquery');
+    await wkof.ready('Jquery');
 
     wkof.include('ItemData');
     await wkof.ready('ItemData');
