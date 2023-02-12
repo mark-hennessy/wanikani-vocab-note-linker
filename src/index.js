@@ -2,7 +2,7 @@
 // @name         WaniKani Vocab Note Linker
 // @namespace    http://tampermonkey.net/
 // @description  Creates links for vocabulary in the Meaning Note and Reading Note sections.
-// @version      1.9.6
+// @version      1.9.7
 // @author       Mark Hennessy
 // @match        https://www.wanikani.com/kanji/*
 // @match        https://www.wanikani.com/vocabulary/*
@@ -639,11 +639,9 @@ MIT
 
     // Jquery needs to be included to prevent wkof from crashing when apiv2_key
     // is not already set in local storage
-    wkof.include('Jquery');
-    await wkof.ready('Jquery');
-
-    wkof.include('ItemData');
-    await wkof.ready('ItemData');
+    const wkofModules = 'Jquery, ItemData';
+    wkof.include(wkofModules);
+    await wkof.ready(wkofModules);
 
     const config = {
       wk_items: {
