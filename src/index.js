@@ -2,7 +2,7 @@
 // @name         WaniKani Vocab Note Linker
 // @namespace    http://tampermonkey.net/
 // @description  Creates links for vocabulary in the Meaning Note and Reading Note sections.
-// @version      1.9.11
+// @version      1.9.12
 // @author       Mark Hennessy
 // @match        https://www.wanikani.com/kanji/*
 // @match        https://www.wanikani.com/vocabulary/*
@@ -219,7 +219,7 @@ MIT
     // The note, i.e. rich text editor, will never be open when this function
     // is called on initial script load, but it might be open when this function
     // is called by the DOM mutation handler.
-    if (isNoteOpen(noteElement)) {
+    if (getTextArea(noteElement)) {
       return;
     }
 
@@ -229,7 +229,7 @@ MIT
       parentElement: noteElement.parentElement,
     });
 
-    const note = getNote(noteElement);
+    const note = getNoteText(noteElement);
     if (!note) {
       return;
     }
@@ -242,11 +242,12 @@ MIT
     linkSectionElement.innerHTML = generateLinkSectionContent(groups);
   }
 
-  function isNoteOpen(noteElement) {
-    return noteElement.firstElementChild?.nodeName === 'FORM';
+  function getTextArea(noteElement) {
+    return noteElement.querySelector('.wk-form__text-area');
   }
 
-  function getNote(noteElement) {
+  function getNoteText(noteElement) {
+    // this works regardless of whether the note is open or closed
     return noteElement.firstElementChild?.textContent.trim();
   }
 
@@ -463,18 +464,18 @@ MIT
       button.classList.add('vnl-hidden');
     }
 
-    if (isNoteOpen(noteElement)) {
+    if (getTextArea(noteElement)) {
       hideButton();
       return;
     }
 
-    const existingNote = getNote(noteElement);
-    if (!existingNote) {
+    const note = getNoteText(noteElement);
+    if (!note) {
       return;
     }
 
-    const updatedNote = getUpdatedNote(existingNote);
-    if (existingNote === updatedNote) {
+    const updatedNote = getUpdatedNote(note);
+    if (note === updatedNote) {
       hideButton();
       return;
     }
@@ -490,14 +491,14 @@ MIT
         // assume the textArea loaded and disconnect the observer
         observer.disconnect();
 
-        const textArea = noteElement.querySelector('.wk-form__text-area');
+        const textArea = getTextArea(noteElement);
         if (textArea) {
           textArea.innerHTML = updatedNote;
         }
       });
 
       // click the 'Edit Note' anchor element to load the textArea
-      noteElement.querySelector('a').click();
+      noteElement.querySelector('a.wk-button').click();
     };
   }
 
