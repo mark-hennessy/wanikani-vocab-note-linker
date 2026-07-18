@@ -2,7 +2,7 @@
 // @name         WaniKani Vocab Note Linker
 // @namespace    http://tampermonkey.net/
 // @description  Creates links for vocabulary in the Meaning Note and Reading Note sections.
-// @version      1.9.8
+// @version      1.9.10
 // @author       Mark Hennessy
 // @match        https://www.wanikani.com/kanji/*
 // @match        https://www.wanikani.com/vocabulary/*
@@ -473,8 +473,8 @@ MIT
       return;
     }
 
-    const generatedNote = generateNote(existingNote);
-    if (existingNote === generatedNote) {
+    const updatedNote = getUpdatedNote(existingNote);
+    if (existingNote === updatedNote) {
       hideButton();
       return;
     }
@@ -492,7 +492,7 @@ MIT
 
         const textArea = noteElement.querySelector('.user-note__input');
         if (textArea) {
-          textArea.innerHTML = generatedNote;
+          textArea.innerHTML = updatedNote;
         }
       });
 
@@ -501,7 +501,7 @@ MIT
     };
   }
 
-  function generateNote(existingNote) {
+  function getUpdatedNote(existingNote) {
     const lines = splitNoteIntoLines(existingNote);
     const groups = parseGroups(existingNote);
 
@@ -518,21 +518,21 @@ MIT
       }
 
       const { meanings } = subject.data;
-      const generatedMeanings = [
+      const updatedMeanings = [
         ...meanings.filter((m) => m.primary),
         ...meanings.filter((m) => !m.primary),
       ]
         .map((m) => m.meaning)
         .join(', ');
 
-      const entryLine = createEntryLine({
+      const updatedLine = createEntryLine({
         slug: entry.slug,
         metadata: entry.metadata,
-        meanings: generatedMeanings,
+        meanings: updatedMeanings,
       });
 
       const { lineIndex } = entry;
-      lines[lineIndex] = entryLine;
+      lines[lineIndex] = updatedLine;
     }
 
     return createNoteFromLines(lines);
@@ -647,7 +647,7 @@ MIT
       wk_items: {
         options: { subjects: true },
         filters: {
-          item_type: 'kan, voc',
+          item_type: 'kanji, vocabulary, kana_vocabulary',
         },
       },
     };
@@ -659,7 +659,15 @@ MIT
     const items = await wkof.ItemData.get_items(config);
 
     const subjectTypeDB = wkof.ItemData.get_index(items, 'item_type');
-    const subjects = subjectTypeDB[currentSubjectType];
+    const simpleSubjectTypeDB = {
+      kanji: subjectTypeDB.kanji,
+      vocabulary: [
+        ...subjectTypeDB.vocabulary,
+        ...subjectTypeDB.kana_vocabulary,
+      ],
+    };
+
+    const subjects = simpleSubjectTypeDB[currentSubjectType];
     return wkof.ItemData.get_index(subjects, 'slug');
   }
   // END Utilities
