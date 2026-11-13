@@ -2,7 +2,7 @@
 // @name         WaniKani Vocab Note Linker
 // @namespace    http://tampermonkey.net/
 // @description  Creates links for vocabulary in the Meaning Note and Reading Note sections.
-// @version      1.9.20
+// @version      1.9.21
 // @author       Mark Hennessy
 // @match        https://www.wanikani.com/*
 // @license      MIT
@@ -247,21 +247,27 @@ async function runScript() {
   }
 
   function updateLinkSection(noteElement) {
-    // The note, i.e. rich text editor, will never be open when this function
-    // is called on initial script load, but it might be open when this function
-    // is called by the DOM mutation handler.
-    if (getTextArea(noteElement)) {
-      return;
-    }
-
     const linkSectionElement = getOrCreateElement({
       tagName: 'div',
       selectorClass: 'vnl-link-section',
       parentElement: noteElement.parentElement,
     });
 
+    function hide() {
+      linkSectionElement.classList.add('vnl-hidden');
+    }
+
+    // The note, i.e. rich text editor, will never be open when this function
+    // is called on initial script load, but it might be open when this function
+    // is called by the DOM mutation handler.
+    if (getTextArea(noteElement)) {
+      hide();
+      return;
+    }
+
     const note = getNoteText(noteElement);
     if (!note) {
+       hide();
       return;
     }
 
@@ -270,7 +276,14 @@ async function runScript() {
     groups = addCopyLinks(groups);
     groups = addEverythingLink(groups);
 
-    linkSectionElement.innerHTML = generateLinkSectionContent(groups);
+    const linkSectionContent = generateLinkSectionContent(groups);
+    if (!linkSectionContent) {
+      hide();
+      return;
+    }
+
+    linkSectionElement.innerHTML = linkSectionContent;
+    linkSectionElement.classList.remove('vnl-hidden');
   }
 
   function getTextArea(noteElement) {
@@ -285,7 +298,7 @@ async function runScript() {
 
     // this must work regardless of whether the note is open or closed
     const sectionNodeList = noteContentElement.querySelectorAll('p');
-    
+
     return Array.from(sectionNodeList)
       .map((el) => el.textContent.trim())
       .join('\n\n');
@@ -499,24 +512,24 @@ async function runScript() {
       },
     });
 
-    function hideButton() {
-      // hide the button
+    function hide() {
       button.classList.add('vnl-hidden');
     }
 
     if (getTextArea(noteElement)) {
-      hideButton();
+      hide();
       return;
     }
 
     const note = getNoteText(noteElement);
     if (!note) {
+      hide();
       return;
     }
 
     const updatedNote = getUpdatedNote(note);
     if (note === updatedNote) {
-      hideButton();
+      hide();
       return;
     }
 
@@ -539,6 +552,9 @@ async function runScript() {
 
       // click the 'Edit Note' anchor element to load the textArea
       noteElement.querySelector('[data-action="note#edit"]').click();
+
+      // manually hide the button because we set ignoreUpdateAttributeName
+      hide();
     };
   }
 
