@@ -2,10 +2,9 @@
 // @name         WaniKani Vocab Note Linker
 // @namespace    http://tampermonkey.net/
 // @description  Creates links for vocabulary in the Meaning Note and Reading Note sections.
-// @version      1.9.17
+// @version      1.9.20
 // @author       Mark Hennessy
-// @match        https://www.wanikani.com/kanji/*
-// @match        https://www.wanikani.com/vocabulary/*
+// @match        https://www.wanikani.com/*
 // @license      MIT
 // ==/UserScript==
 
@@ -53,17 +52,42 @@ License
 MIT
 */
 
-(async function () {
-  const isWaniKani = window.location.host === 'www.wanikani.com';
+if (window.navigation) {
+  window.navigation.addEventListener('navigate', (event) => {
+    const destinationUrl = event.destination.url;
+    if (destinationUrl === window.location.href) {
+      return;
+    }
+
+    // The navigate event fires before the destination is committed, so defer until the URL updates.
+    setTimeout(() => {
+      if (window.location.href !== destinationUrl) {
+        return;
+      }
+
+      runScript();
+    }, 0);
+  });
+}
+
+runScript();
+
+async function runScript() {
+  const isTestFile = window.location.host !== 'www.wanikani.com';
 
   const pathParts = decodeURI(window.location.pathname)
     .split('/')
     .filter(Boolean);
 
-  const currentSubjectType = isWaniKani ? pathParts[0] : 'vocabulary';
+  const [firstPathPart, secondPathPart] = pathParts;
+  if (firstPathPart !== 'kanji' && firstPathPart !== 'vocabulary' && !isTestFile) {
+    return;
+  }
+
+  const currentSubjectType = isTestFile ? 'vocabulary' : firstPathPart;
   const isKanji = currentSubjectType === 'kanji';
 
-  const currentSlug = isWaniKani ? pathParts[1] : '大変';
+  const currentSlug = isTestFile ? '大変' : secondPathPart;
 
   const noteLineDelimiter = '\n';
 
@@ -688,4 +712,4 @@ MIT
     return wkof.ItemData.get_index(subjects, 'slug');
   }
   // END Utilities
-})();
+}
