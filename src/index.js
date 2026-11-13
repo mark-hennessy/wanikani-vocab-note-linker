@@ -2,7 +2,7 @@
 // @name         WaniKani Vocab Note Linker
 // @namespace    http://tampermonkey.net/
 // @description  Creates links for vocabulary in the Meaning Note and Reading Note sections.
-// @version      1.9.13
+// @version      1.9.17
 // @author       Mark Hennessy
 // @match        https://www.wanikani.com/kanji/*
 // @match        https://www.wanikani.com/vocabulary/*
@@ -125,7 +125,7 @@ MIT
 
   // do this first, before calling getSlugDB, to reduce flashing
   for (const noteElement of noteElements) {
-    noteElement.parentElement?.setAttribute('lang', 'ja');
+    noteElement.setAttribute('lang', 'ja');
   }
 
   injectCopyButton();
@@ -139,7 +139,7 @@ MIT
   }
 
   function getNoteElements() {
-    const noteSelectors = ['#user_meaning_note', '#user_reading_note'];
+    const noteSelectors = ['[data-note-kind-value="meaning_note"]', '[data-note-kind-value="reading_note"]'];
 
     const noteElements = noteSelectors
       .map((noteSelector) => document.querySelector(noteSelector))
@@ -178,17 +178,16 @@ MIT
 
   function screenScrapeCurrentEntry() {
     const primaryMeanings = document.querySelector(
-      '.subject-section--meaning .subject-section__meanings:nth-of-type(1) .subject-section__meanings-items',
+      '[data-name="primaryMeaning"] [data-content]',
     );
 
     const secondaryMeanings = document.querySelector(
-      '.subject-section--meaning .subject-section__meanings:nth-of-type(2) .subject-section__meanings-items',
+      '[data-name="alternativeMeanings"] [data-content]',
     );
 
     const meanings = [primaryMeanings, secondaryMeanings]
       .filter(Boolean)
       .map((el) => el.textContent.trim())
-      .filter((v) => v !== 'None')
       .join(', ');
 
     const readingNodeList = document.querySelectorAll(
@@ -255,8 +254,17 @@ MIT
   }
 
   function getNoteText(noteElement) {
-    // this works regardless of whether the note is open or closed
-    return noteElement.firstElementChild?.textContent.trim();
+    const noteContentElement = noteElement.firstElementChild;
+    if (!noteContentElement) {
+      return '';
+    }
+
+    // this must work regardless of whether the note is open or closed
+    const sectionNodeList = noteContentElement.querySelectorAll('p');
+    
+    return Array.from(sectionNodeList)
+      .map((el) => el.textContent.trim())
+      .join('\n\n');
   }
 
   function parseGroups(note) {
@@ -501,12 +509,12 @@ MIT
 
         const textArea = getTextArea(noteElement);
         if (textArea) {
-          textArea.innerHTML = updatedNote;
+          textArea.value = updatedNote;
         }
       });
 
       // click the 'Edit Note' anchor element to load the textArea
-      noteElement.querySelector('a.wk-button').click();
+      noteElement.querySelector('[data-action="note#edit"]').click();
     };
   }
 
